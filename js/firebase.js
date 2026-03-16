@@ -70,7 +70,20 @@ const FirebaseSync = (() => {
   }
 
   /**
-   * Stop listening
+   * Remove a specific callback without killing the listener
+   */
+  function removeCallback(callback) {
+    callbacks = callbacks.filter(cb => cb !== callback);
+    // If no callbacks remain, detach the Firebase listener
+    if (callbacks.length === 0 && matchRef && listener) {
+      matchRef.off('value', listener);
+      listener = null;
+      isListening = false;
+    }
+  }
+
+  /**
+   * Stop listening (removes all callbacks)
    */
   function stopListening() {
     if (matchRef && listener) {
@@ -93,5 +106,5 @@ const FirebaseSync = (() => {
     }
   }
 
-  return { init, syncState, listen, stopListening, resetMatch };
+  return { init, syncState, listen, removeCallback, stopListening, resetMatch };
 })();

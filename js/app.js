@@ -143,8 +143,8 @@ const App = (() => {
     }
 
     // ---- Auth buttons ----
-    document.getElementById('btn-local-auth').addEventListener('click', () => showAuthModal('local'));
-    document.getElementById('btn-tournament-auth').addEventListener('click', () => showAuthModal('tournament'));
+    document.getElementById('local-auth-banner').addEventListener('click', () => showAuthModal('local'));
+    document.getElementById('tournament-auth-banner').addEventListener('click', () => showAuthModal('tournament'));
 
     // ---- Auth modal ----
     document.getElementById('auth-confirm').addEventListener('click', () => {
@@ -172,35 +172,35 @@ const App = (() => {
       document.getElementById('auth-error').textContent = '';
     });
 
-    // ---- Reset buttons ----
-    document.getElementById('btn-local-reset').addEventListener('click', () => showResetModal());
-    document.getElementById('btn-tournament-reset').addEventListener('click', () => showResetModal());
+    // ---- Delete buttons ----
+    document.getElementById('btn-local-delete').addEventListener('click', () => showDeleteModal());
+    document.getElementById('btn-tournament-delete').addEventListener('click', () => showDeleteModal());
 
-    // ---- Reset modal ----
-    document.getElementById('reset-confirm').addEventListener('click', () => {
-      const code = document.getElementById('reset-code-input').value.trim();
+    // ---- Delete modal ----
+    document.getElementById('delete-confirm').addEventListener('click', () => {
+      const code = document.getElementById('delete-code-input').value.trim();
       let success = false;
 
       if (currentMode === 'local') {
-        success = LocalMode.resetMatch(code);
+        success = LocalMode.deleteMatch(code);
       } else if (currentMode === 'tournament') {
-        success = TournamentMode.resetMatch(code);
+        success = TournamentMode.deleteMatch(code);
       }
 
       if (success) {
-        hideModal('reset-modal');
-        document.getElementById('reset-code-input').value = '';
-        document.getElementById('reset-error').textContent = '';
+        hideModal('delete-modal');
+        document.getElementById('delete-code-input').value = '';
+        document.getElementById('delete-error').textContent = '';
         navigate('home');
       } else {
-        document.getElementById('reset-error').textContent = 'Invalid code. Try again.';
+        document.getElementById('delete-error').textContent = 'Invalid code. Try again.';
       }
     });
 
-    document.getElementById('reset-cancel').addEventListener('click', () => {
-      hideModal('reset-modal');
-      document.getElementById('reset-code-input').value = '';
-      document.getElementById('reset-error').textContent = '';
+    document.getElementById('delete-cancel').addEventListener('click', () => {
+      hideModal('delete-modal');
+      document.getElementById('delete-code-input').value = '';
+      document.getElementById('delete-error').textContent = '';
     });
 
     // ---- Home buttons ----
@@ -211,8 +211,8 @@ const App = (() => {
     document.getElementById('auth-code-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('auth-confirm').click();
     });
-    document.getElementById('reset-code-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') document.getElementById('reset-confirm').click();
+    document.getElementById('delete-code-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('delete-confirm').click();
     });
 
     // Start on home
@@ -229,11 +229,11 @@ const App = (() => {
   }
 
   /**
-   * Show reset modal
+   * Show delete modal
    */
-  function showResetModal() {
-    document.getElementById('reset-modal').classList.add('active');
-    document.getElementById('reset-code-input').focus();
+  function showDeleteModal() {
+    document.getElementById('delete-modal').classList.add('active');
+    document.getElementById('delete-code-input').focus();
   }
 
   /**

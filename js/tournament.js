@@ -5,6 +5,7 @@
 const TournamentMode = (() => {
   let matchState = null;
   let isAuthenticated = false;
+  let matchListener = null;
 
   const AUTH_CODE = '456838';
   const RESET_CODE = '6000040312';
@@ -128,11 +129,13 @@ const TournamentMode = (() => {
 
     App.navigate('tournament-match');
 
-    if (isAuthenticated) {
-      FirebaseSync.syncState(matchState);
+    // Clean up previous match listener if any
+    if (matchListener) {
+      FirebaseSync.removeCallback(matchListener);
     }
 
-    FirebaseSync.listen((data) => {
+    // Create and register new match listener
+    matchListener = (data) => {
       if (!isAuthenticated && data) {
         // Don't overwrite our new match state with an old finished match
         if (data.isMatchOver && matchState && !matchState.isMatchOver) {
@@ -145,7 +148,10 @@ const TournamentMode = (() => {
           showMatchEnd();
         }
       }
-    });
+    };
+
+    // Start listening for real-time updates from Firebase
+    FirebaseSync.listen(matchListener);
   }
 
   /**
@@ -167,6 +173,24 @@ const TournamentMode = (() => {
     if (data.isMatchOver) {
       showMatchEnd();
     }
+
+    // Clean up previous match listener if any
+    if (matchListener) {
+      FirebaseSync.removeCallback(matchListener);
+    }
+
+    // Register listener for real-time updates
+    matchListener = (updatedData) => {
+      if (!isAuthenticated && updatedData) {
+        matchState = updatedData;
+        updateScoreboard();
+        renderPlayerList();
+        if (updatedData.isMatchOver) {
+          showMatchEnd();
+        }
+      }
+    };
+    FirebaseSync.listen(matchListener);
   }
 
   /**
@@ -328,12 +352,15 @@ const TournamentMode = (() => {
   function updateAuthBanner() {
     const banner = el('tournament-auth-banner');
     if (!banner) return;
+    const icon = banner.querySelector('.auth-corner-icon');
     if (isAuthenticated) {
-      banner.className = 'auth-banner authenticated';
-      banner.querySelector('span').textContent = '✅ Authenticated — You are controlling this match';
+      banner.classList.add('authenticated');
+      if (icon) icon.textContent = '✅';
+      banner.title = 'Authenticated';
     } else {
-      banner.className = 'auth-banner';
-      banner.querySelector('span').textContent = '🔒 Authenticate to control scoring';
+      banner.classList.remove('authenticated');
+      if (icon) icon.textContent = '🔒';
+      banner.title = 'Authenticate';
     }
   }
 
@@ -347,10 +374,14 @@ const TournamentMode = (() => {
     return false;
   }
 
-  function resetMatch(code) {
-    if (code === RESET_CODE) {
+  function deleteMatch(code) {
+    if (code === AUTH_CODE) {
       matchState = null;
       isAuthenticated = false;
+      if (matchListener) {
+        FirebaseSync.removeCallback(matchListener);
+        matchListener = null;
+      }
       FirebaseSync.resetMatch();
       return true;
     }
@@ -361,7 +392,7 @@ const TournamentMode = (() => {
   function getState() { return matchState; }
 
   return {
-    initSetup, startMatch, joinLiveMatch, handleAction, authenticate, resetMatch,
+    initSetup, startMatch, joinLiveMatch, handleAction, authenticate, deleteMatch,
     getIsAuthenticated, getState, updateScoreboard, showMatchEnd, updateAuthBanner, renderPlayerList
   };
 })();

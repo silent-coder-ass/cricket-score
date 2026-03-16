@@ -432,9 +432,152 @@ input, button {
 }
 
 /* ================================================
+   PREMIUM LOCAL SETUP STYLES
+   ================================================ */
+
+/* Premium Header Card */
+.setup-header-card {
+  text-align: center;
+  padding: 28px 16px 20px;
+  margin-bottom: 8px;
+  animation: fadeSlideIn 0.5s ease;
+}
+
+.setup-header-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+  animation: logoBounce 2.5s ease-in-out infinite;
+}
+
+.setup-title-premium {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.setup-title-premium span {
+  background: linear-gradient(135deg, var(--accent), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.setup-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 6px;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* Setup Cards */
+.setup-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: fadeSlideIn 0.5s ease;
+}
+
+.setup-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.setup-card-icon {
+  font-size: 1.1rem;
+}
+
+.setup-card-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+}
+
+/* Teams Row */
+.teams-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.team-input-group {
+  flex: 1;
+}
+
+.teams-vs-badge {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--accent);
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 12px var(--accent-glow);
+  margin-bottom: 4px;
+}
+
+/* Config Row */
+.config-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Premium Select */
+.premium-select {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  transition: border-color 0.2s ease;
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.premium-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* Glow Button */
+.glow-btn {
+  box-shadow: 0 4px 24px rgba(0, 229, 255, 0.25);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 4px 24px rgba(0, 229, 255, 0.2); }
+  50% { box-shadow: 0 4px 36px rgba(0, 229, 255, 0.4); }
+}
+
+/* ================================================
    MATCH SCREEN — SCOREBOARD
    ================================================ */
 .match-container {
+  position: relative;
   flex: 1;
   max-width: 480px;
   margin: 0 auto;
@@ -445,42 +588,90 @@ input, button {
   padding-bottom: 16px;
 }
 
-/* Auth Banner */
-.auth-banner {
+/* Auth Corner Button */
+.auth-corner-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  color: var(--red);
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.auth-banner.hidden {
-  display: none;
+.auth-corner-btn:active {
+  transform: scale(0.9);
 }
 
-.auth-banner.authenticated {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.2);
-  color: var(--green);
+.auth-corner-icon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
-.auth-btn {
-  background: var(--red);
-  color: #fff;
-  padding: 6px 14px;
-  border-radius: 6px;
+.auth-corner-btn.authenticated {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+}
+
+/* Creator Credit */
+.creator-credit {
+  text-align: center;
   font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+  color: var(--text-muted);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  padding: 12px 0;
+  opacity: 0.8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.auth-banner.authenticated .auth-btn {
-  display: none;
+.creator-credit strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Instagram Follow Button */
+.insta-follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.insta-follow-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(131, 58, 180, 0.4);
+}
+
+.insta-follow-btn:active {
+  transform: scale(0.97);
+}
+
+.insta-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 /* Tournament Header */
@@ -881,6 +1072,16 @@ input, button {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.action-btn.delete-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--red);
+}
+
+.action-btn.delete-btn:active {
+  background: rgba(239, 68, 68, 0.2);
+}
+
 /* ================================================
    MATCH END SCREEN
    ================================================ */
@@ -1158,6 +1359,61 @@ input, button {
 @media (min-width: 500px) {
   .run-buttons {
     grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+/* Mobile optimization for setup page */
+@media (max-width: 400px) {
+  .setup-header-card {
+    padding: 20px 12px 16px;
+  }
+  
+  .setup-header-icon {
+    font-size: 2.4rem;
+  }
+  
+  .setup-title-premium {
+    font-size: 1.5rem;
+  }
+  
+  .setup-subtitle {
+    font-size: 0.78rem;
+  }
+  
+  .teams-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .teams-vs-badge {
+    align-self: center;
+    width: 32px;
+    height: 32px;
+    font-size: 0.65rem;
+  }
+  
+  .setup-card {
+    padding: 12px;
+  }
+  
+  .setup-card-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+  
+  .config-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .setup-form {
+    gap: 12px;
+  }
+  
+  .form-group input,
+  .premium-select {
+    padding: 12px 14px;
+    font-size: 0.95rem;
   }
 }
 

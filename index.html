@@ -55,44 +55,88 @@
           <div class="ripple-container"></div>
         </button>
       </div>
+
+      <div class="creator-credit">
+        Made ❤️ by <strong>SANUWAR HUSSAIN</strong>
+        <a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn">
+          <svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          Follow on Instagram
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- ==================== LOCAL SETUP SCREEN ==================== -->
   <section id="screen-local-setup" class="screen">
-    <div class="setup-container">
+    <div class="setup-container local-setup-premium">
       <button class="back-btn" data-navigate="home">← Back</button>
-      <h2 class="setup-title">Local Match Setup</h2>
+      
+      <!-- Premium Header -->
+      <div class="setup-header-card">
+        <div class="setup-header-icon">🏏</div>
+        <h2 class="setup-title-premium">Local Match<br><span>Setup</span></h2>
+        <p class="setup-subtitle">Configure your match and start scoring</p>
+      </div>
+
       <form id="local-setup-form" class="setup-form">
-        <div class="form-group">
-          <label for="local-teamA">Team A Name</label>
-          <input type="text" id="local-teamA" placeholder="Enter Team A name" required>
+        <!-- Teams Card -->
+        <div class="setup-card teams-card">
+          <div class="setup-card-header">
+            <span class="setup-card-icon">⚔️</span>
+            <span class="setup-card-label">Teams</span>
+          </div>
+          <div class="teams-row">
+            <div class="form-group team-input-group">
+              <label for="local-teamA">🔵 Team A</label>
+              <input type="text" id="local-teamA" placeholder="e.g. India" required>
+            </div>
+            <div class="teams-vs-badge">VS</div>
+            <div class="form-group team-input-group">
+              <label for="local-teamB">🔴 Team B</label>
+              <input type="text" id="local-teamB" placeholder="e.g. Australia" required>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="local-teamB">Team B Name</label>
-          <input type="text" id="local-teamB" placeholder="Enter Team B name" required>
+
+        <!-- Batting First Card -->
+        <div class="setup-card">
+          <div class="setup-card-header">
+            <span class="setup-card-icon">🏏</span>
+            <span class="setup-card-label">Batting First</span>
+          </div>
+          <div class="form-group" id="local-batting-group">
+            <select id="local-bat-first" class="premium-select">
+              <option value="0">Team A</option>
+              <option value="1">Team B</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group" id="local-batting-group">
-          <label for="local-bat-first">Team to Bat First</label>
-          <select id="local-bat-first">
-            <option value="0">Team A</option>
-            <option value="1">Team B</option>
-          </select>
+
+        <!-- Match Config Card -->
+        <div class="setup-card">
+          <div class="setup-card-header">
+            <span class="setup-card-icon">⚙️</span>
+            <span class="setup-card-label">Match Configuration</span>
+          </div>
+          <div class="config-row">
+            <div class="form-group config-input">
+              <label for="local-overs">🎯 Overs</label>
+              <input type="number" id="local-overs" placeholder="e.g. 10" min="1" max="50" required>
+            </div>
+            <div class="form-group config-input">
+              <label for="local-players">👥 Players</label>
+              <input type="number" id="local-players" placeholder="e.g. 8" min="2" max="11" required>
+            </div>
+          </div>
+          <div class="players-info" id="local-players-info"></div>
         </div>
-        <div class="form-group">
-          <label for="local-overs">Total Overs</label>
-          <input type="number" id="local-overs" placeholder="e.g. 10" min="1" max="50" required>
-        </div>
-        <div class="form-group">
-          <label for="local-players">Players per Team</label>
-          <input type="number" id="local-players" placeholder="e.g. 8" min="2" max="11" required>
-        </div>
-        <div class="players-info" id="local-players-info"></div>
-        <button type="submit" class="start-btn" id="btn-start-local">
-          <span>Start Match</span>
+
+        <button type="submit" class="start-btn glow-btn" id="btn-start-local">
+          <span>🚀 Start Match</span>
           <div class="ripple-container"></div>
         </button>
       </form>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
     </div>
   </section>
 
@@ -144,17 +188,17 @@
           <div class="ripple-container"></div>
         </button>
       </form>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
     </div>
   </section>
 
   <!-- ==================== LOCAL MATCH SCREEN ==================== -->
   <section id="screen-local-match" class="screen">
     <div class="match-container">
-      <!-- Auth Banner -->
-      <div class="auth-banner" id="local-auth-banner">
-        <span>🔒 Authenticate to control scoring</span>
-        <button class="auth-btn" id="btn-local-auth">Authenticate</button>
-      </div>
+      <!-- Auth Button (small corner) -->
+      <button class="auth-corner-btn" id="local-auth-banner" title="Authenticate">
+        <span class="auth-corner-icon">🔒</span>
+      </button>
 
       <!-- Scoreboard -->
       <div class="scoreboard" id="local-scoreboard">
@@ -231,20 +275,20 @@
 
       <!-- Bottom Actions -->
       <div class="match-actions">
-        <button class="action-btn" id="btn-local-reset">🔄 Reset</button>
+        <button class="action-btn delete-btn" id="btn-local-delete">🗑️ Delete Match</button>
         <button class="action-btn" id="btn-local-home">🏠 Home</button>
       </div>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
     </div>
   </section>
 
   <!-- ==================== TOURNAMENT MATCH SCREEN ==================== -->
   <section id="screen-tournament-match" class="screen">
     <div class="match-container">
-      <!-- Auth Banner -->
-      <div class="auth-banner" id="tournament-auth-banner">
-        <span>🔒 Authenticate to control scoring</span>
-        <button class="auth-btn" id="btn-tournament-auth">Authenticate</button>
-      </div>
+      <!-- Auth Button (small corner) -->
+      <button class="auth-corner-btn" id="tournament-auth-banner" title="Authenticate">
+        <span class="auth-corner-icon">🔒</span>
+      </button>
 
       <!-- Tournament Header -->
       <div class="tournament-header" id="tournament-header-info">
@@ -332,9 +376,10 @@
 
       <!-- Bottom Actions -->
       <div class="match-actions">
-        <button class="action-btn" id="btn-tournament-reset">🔄 Reset</button>
+        <button class="action-btn delete-btn" id="btn-tournament-delete">🗑️ Delete Match</button>
         <button class="action-btn" id="btn-tournament-home">🏠 Home</button>
       </div>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
     </div>
   </section>
 
@@ -351,6 +396,7 @@
           <span>New Match</span>
           <div class="ripple-container"></div>
         </button>
+        <div class="creator-credit" style="margin-top: 16px;">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
       </div>
     </div>
   </section>
@@ -369,16 +415,16 @@
     </div>
   </div>
 
-  <!-- ==================== RESET MODAL ==================== -->
-  <div class="modal-overlay" id="reset-modal">
+  <!-- ==================== DELETE MODAL ==================== -->
+  <div class="modal-overlay" id="delete-modal">
     <div class="modal">
-      <h3>⚠️ Reset Match</h3>
-      <p>Enter secret code to reset all match data</p>
-      <input type="password" id="reset-code-input" placeholder="Enter secret code" class="modal-input">
-      <div class="modal-error" id="reset-error"></div>
+      <h3>🗑️ Delete Match</h3>
+      <p>Enter authentication code to permanently delete this live match</p>
+      <input type="password" id="delete-code-input" placeholder="Enter auth code" class="modal-input">
+      <div class="modal-error" id="delete-error"></div>
       <div class="modal-actions">
-        <button class="modal-btn cancel" id="reset-cancel">Cancel</button>
-        <button class="modal-btn confirm danger" id="reset-confirm">Reset Match</button>
+        <button class="modal-btn cancel" id="delete-cancel">Cancel</button>
+        <button class="modal-btn confirm danger" id="delete-confirm">Delete Match</button>
       </div>
     </div>
   </div>

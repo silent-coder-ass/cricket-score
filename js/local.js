@@ -5,6 +5,7 @@
 const LocalMode = (() => {
   let matchState = null;
   let isAuthenticated = false;
+  let matchListener = null;
 
   const AUTH_CODE = '456838';
   const RESET_CODE = '6000040312';
@@ -80,13 +81,13 @@ const LocalMode = (() => {
 
     App.navigate('local-match');
 
-    // Sync initial state to Firebase
-    if (isAuthenticated) {
-      FirebaseSync.syncState(matchState);
+    // Clean up previous match listener if any
+    if (matchListener) {
+      FirebaseSync.removeCallback(matchListener);
     }
 
-    // Start listening for updates (for non-auth devices)
-    FirebaseSync.listen((data) => {
+    // Create and register new match listener
+    matchListener = (data) => {
       if (!isAuthenticated && data) {
         // Don't overwrite our new match state with an old finished match
         if (data.isMatchOver && matchState && !matchState.isMatchOver) {
@@ -98,7 +99,10 @@ const LocalMode = (() => {
           showMatchEnd();
         }
       }
-    });
+    };
+
+    // Start listening for real-time updates from Firebase
+    FirebaseSync.listen(matchListener);
   }
 
   /**
@@ -119,6 +123,23 @@ const LocalMode = (() => {
     if (data.isMatchOver) {
       showMatchEnd();
     }
+
+    // Clean up previous match listener if any
+    if (matchListener) {
+      FirebaseSync.removeCallback(matchListener);
+    }
+
+    // Register listener for real-time updates
+    matchListener = (updatedData) => {
+      if (!isAuthenticated && updatedData) {
+        matchState = updatedData;
+        updateScoreboard();
+        if (updatedData.isMatchOver) {
+          showMatchEnd();
+        }
+      }
+    };
+    FirebaseSync.listen(matchListener);
   }
 
   /**
@@ -305,12 +326,15 @@ const LocalMode = (() => {
   function updateAuthBanner() {
     const banner = el('local-auth-banner');
     if (!banner) return;
+    const icon = banner.querySelector('.auth-corner-icon');
     if (isAuthenticated) {
-      banner.className = 'auth-banner authenticated';
-      banner.querySelector('span').textContent = '✅ Authenticated — You are controlling this match';
+      banner.classList.add('authenticated');
+      if (icon) icon.textContent = '✅';
+      banner.title = 'Authenticated';
     } else {
-      banner.className = 'auth-banner';
-      banner.querySelector('span').textContent = '🔒 Authenticate to control scoring';
+      banner.classList.remove('authenticated');
+      if (icon) icon.textContent = '🔒';
+      banner.title = 'Authenticate';
     }
   }
 
@@ -331,12 +355,16 @@ const LocalMode = (() => {
   }
 
   /**
-   * Reset match
+   * Delete match (clears Firebase and local state)
    */
-  function resetMatch(code) {
-    if (code === RESET_CODE) {
+  function deleteMatch(code) {
+    if (code === AUTH_CODE) {
       matchState = null;
       isAuthenticated = false;
+      if (matchListener) {
+        FirebaseSync.removeCallback(matchListener);
+        matchListener = null;
+      }
       FirebaseSync.resetMatch();
       return true;
     }
@@ -363,7 +391,7 @@ const LocalMode = (() => {
     joinLiveMatch,
     handleAction,
     authenticate,
-    resetMatch,
+    deleteMatch,
     getIsAuthenticated,
     getState,
     updateScoreboard,
