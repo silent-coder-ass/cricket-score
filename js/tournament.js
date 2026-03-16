@@ -1,0 +1,367 @@
+/* ============================
+   Tournament Score Mode Controller
+   ============================ */
+
+const TournamentMode = (() => {
+  let matchState = null;
+  let isAuthenticated = false;
+
+  const AUTH_CODE = '456838';
+  const RESET_CODE = '6000040312';
+
+  const el = (id) => document.getElementById(id);
+
+  /**
+   * Initialize tournament setup
+   */
+  function initSetup() {
+    const playersInput = el('tournament-players');
+    const info = el('tournament-players-info');
+    const teamAInput = el('tournament-teamA');
+    const teamBInput = el('tournament-teamB');
+    const batFirstSelect = el('tournament-bat-first');
+
+    const updateBatFirstOptions = () => {
+      if (!batFirstSelect) return;
+      const tA = teamAInput?.value.trim() || 'Team A';
+      const tB = teamBInput?.value.trim() || 'Team B';
+      batFirstSelect.options[0].text = tA;
+      batFirstSelect.options[1].text = tB;
+    };
+
+    if (teamAInput) teamAInput.addEventListener('input', updateBatFirstOptions);
+    if (teamBInput) teamBInput.addEventListener('input', updateBatFirstOptions);
+
+    if (playersInput) {
+      playersInput.addEventListener('input', () => {
+        const n = parseInt(playersInput.value);
+        if (n >= 2) {
+          info.textContent = `Total Wickets = ${n - 1} (Players - 1)`;
+          renderPlayerNameInputs(n);
+        } else {
+          info.textContent = '';
+          el('tournament-player-names-section').innerHTML = '';
+        }
+      });
+    }
+
+    const form = el('tournament-setup-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        startMatch();
+      });
+    }
+  }
+
+  /**
+   * Render player name inputs dynamically
+   */
+  function renderPlayerNameInputs(count) {
+    const section = el('tournament-player-names-section');
+    if (!section) return;
+
+    const teamAName = el('tournament-teamA').value.trim() || 'Team A';
+    const teamBName = el('tournament-teamB').value.trim() || 'Team B';
+
+    let html = '';
+
+    // Team A Players
+    html += `<div class="player-names-group"><h4>${teamAName} Players</h4><div class="player-inputs">`;
+    for (let i = 1; i <= count; i++) {
+      html += `<input type="text" class="playerA-input" data-index="${i}" placeholder="Player ${i}" />`;
+    }
+    html += `</div></div>`;
+
+    // Team B Players
+    html += `<div class="player-names-group"><h4>${teamBName} Players</h4><div class="player-inputs">`;
+    for (let i = 1; i <= count; i++) {
+      html += `<input type="text" class="playerB-input" data-index="${i}" placeholder="Player ${i}" />`;
+    }
+    html += `</div></div>`;
+
+    section.innerHTML = html;
+  }
+
+  /**
+   * Start a tournament match
+   */
+  function startMatch() {
+    const tournamentName = el('tournament-name').value.trim() || 'Tournament';
+    const teamA = el('tournament-teamA').value.trim() || 'Team A';
+    const teamB = el('tournament-teamB').value.trim() || 'Team B';
+    const captainA = el('tournament-captainA').value.trim() || '';
+    const captainB = el('tournament-captainB').value.trim() || '';
+    const overs = parseInt(el('tournament-overs').value) || 10;
+    const players = parseInt(el('tournament-players').value) || 11;
+
+    // Gather player names
+    const playersA = [];
+    const playersB = [];
+    document.querySelectorAll('.playerA-input').forEach(inp => {
+      playersA.push(inp.value.trim() || `Player ${inp.dataset.index}`);
+    });
+    document.querySelectorAll('.playerB-input').forEach(inp => {
+      playersB.push(inp.value.trim() || `Player ${inp.dataset.index}`);
+    });
+    const batFirst = parseInt(el('tournament-bat-first').value) || 0;
+
+    matchState = CricketEngine.createMatch({
+      mode: 'tournament',
+      teamA, teamB,
+      captainA, captainB,
+      totalOvers: overs,
+      playersPerTeam: players,
+      playersA, playersB,
+      tournamentName,
+      batFirst: batFirst
+    });
+
+    isAuthenticated = false;
+    updateAuthBanner();
+    updateScoreboard();
+    renderPlayerList();
+    
+    // Clear old celebration
+    const bg = document.getElementById('celebration-bg');
+    if (bg) bg.innerHTML = '';
+
+    App.navigate('tournament-match');
+
+    if (isAuthenticated) {
+      FirebaseSync.syncState(matchState);
+    }
+
+    FirebaseSync.listen((data) => {
+      if (!isAuthenticated && data) {
+        // Don't overwrite our new match state with an old finished match
+        if (data.isMatchOver && matchState && !matchState.isMatchOver) {
+          return;
+        }
+        matchState = data;
+        updateScoreboard();
+        renderPlayerList();
+        if (data.isMatchOver) {
+          showMatchEnd();
+        }
+      }
+    });
+  }
+
+  /**
+   * Join an active live match as a viewer
+   */
+  function joinLiveMatch(data) {
+    matchState = data;
+    isAuthenticated = false;
+    updateAuthBanner();
+    updateScoreboard();
+    renderPlayerList();
+    
+    // Clear old celebration
+    const bg = el('celebration-bg');
+    if (bg) bg.innerHTML = '';
+    
+    App.navigate('tournament-match');
+    
+    if (data.isMatchOver) {
+      showMatchEnd();
+    }
+  }
+
+  /**
+   * Handle scoring action
+   */
+  function handleAction(action) {
+    if (!matchState || matchState.isMatchOver) return;
+
+    let animType = null;
+
+    switch (action) {
+      case 'dot':  CricketEngine.addRuns(matchState, 0); break;
+      case '1':    CricketEngine.addRuns(matchState, 1); break;
+      case '2':    CricketEngine.addRuns(matchState, 2); break;
+      case '3':    CricketEngine.addRuns(matchState, 3); break;
+      case '4':    CricketEngine.addRuns(matchState, 4); animType = 'four'; break;
+      case '5':    CricketEngine.addRuns(matchState, 5); break;
+      case '6':    CricketEngine.addRuns(matchState, 6); animType = 'six'; break;
+      case 'wide': CricketEngine.addWide(matchState); animType = 'wide'; break;
+      case 'noball': CricketEngine.addNoBall(matchState); animType = 'noball'; break;
+      case 'out':  CricketEngine.addWicket(matchState); animType = 'out'; break;
+      default: return;
+    }
+
+    if (animType) Animations.show(animType);
+
+    const runsEl = el('tournament-runs');
+    if (runsEl) {
+      runsEl.classList.remove('animate');
+      void runsEl.offsetWidth;
+      runsEl.classList.add('animate');
+    }
+
+    updateScoreboard();
+
+    if (isAuthenticated) {
+      FirebaseSync.syncState(matchState);
+    }
+
+    if (matchState.isMatchOver) {
+      setTimeout(() => showMatchEnd(), 1200);
+    }
+  }
+
+  /**
+   * Update scoreboard
+   */
+  function updateScoreboard() {
+    if (!matchState) return;
+
+    const team = CricketEngine.getBattingTeam(matchState);
+    const innings = matchState.currentInnings;
+
+    // Tournament title
+    el('tournament-display-name').textContent = matchState.tournamentName || 'Tournament';
+
+    // Team badges
+    el('tournament-sb-teamA').textContent = matchState.teams[0].name;
+    el('tournament-sb-teamB').textContent = matchState.teams[1].name;
+    el('tournament-sb-captainA').textContent = matchState.teams[0].captain ? `C: ${matchState.teams[0].captain}` : '';
+    el('tournament-sb-captainB').textContent = matchState.teams[1].captain ? `C: ${matchState.teams[1].captain}` : '';
+
+    el('tournament-teamA-badge').classList.toggle('batting', innings === 0);
+    el('tournament-teamB-badge').classList.toggle('batting', innings === 1);
+
+    el('tournament-innings-label').textContent = innings === 0 ? '1st Innings' : '2nd Innings';
+
+    el('tournament-runs').textContent = team.runs;
+    el('tournament-wickets').textContent = team.wickets;
+    el('tournament-overs-display').textContent = CricketEngine.getOversDisplay(matchState);
+    el('tournament-total-overs').textContent = matchState.totalOvers;
+
+    el('tournament-players-remaining').textContent = CricketEngine.getPlayersRemaining(matchState);
+    el('tournament-run-rate').textContent = CricketEngine.getRunRate(matchState);
+
+    const showTarget = innings === 1 && matchState.target !== null;
+    el('tournament-target-section').style.display = showTarget ? '' : 'none';
+    el('tournament-required-section').style.display = showTarget ? '' : 'none';
+    el('tournament-reqrate-section').style.display = showTarget ? '' : 'none';
+
+    if (showTarget) {
+      el('tournament-target').textContent = matchState.target;
+      const reqRuns = CricketEngine.getRequiredRuns(matchState);
+      const remBalls = CricketEngine.getRemainingBalls(matchState);
+      el('tournament-required').textContent = `${reqRuns} off ${remBalls}`;
+      el('tournament-req-rate').textContent = CricketEngine.getRequiredRate(matchState) || '0.00';
+    }
+
+    // Wicket indicator
+    updateWicketIndicator('tournament-wicket-indicator', team.wickets, matchState.maxWickets);
+
+    // Current over
+    updateCurrentOver('tournament-current-over', team.currentOver);
+  }
+
+  function updateWicketIndicator(id, wickets, max) {
+    const c = el(id);
+    if (!c) return;
+    c.innerHTML = '';
+    for (let i = 0; i < max; i++) {
+      const d = document.createElement('div');
+      d.className = 'wicket-dot' + (i < wickets ? ' out' : '');
+      c.appendChild(d);
+    }
+  }
+
+  function updateCurrentOver(id, overBalls) {
+    const c = el(id);
+    if (!c) return;
+    c.innerHTML = '';
+    (overBalls || []).forEach(b => {
+      const t = document.createElement('span');
+      t.className = 'ball-tag ' + (b.class || '');
+      t.textContent = b.label;
+      c.appendChild(t);
+    });
+  }
+
+  /**
+   * Render player list on scoreboard
+   */
+  function renderPlayerList() {
+    const section = el('tournament-player-list');
+    if (!section || !matchState) return;
+
+    const battingIdx = matchState.currentInnings;
+    const battingTeam = matchState.teams[battingIdx];
+    const players = battingTeam.players || [];
+
+    if (players.length === 0) {
+      section.innerHTML = '';
+      return;
+    }
+
+    let html = `<h4>${battingTeam.name} — Squad</h4><div class="player-list-grid">`;
+    players.forEach((p, i) => {
+      html += `<div class="player-item"><span class="player-num">${i + 1}.</span> ${p}</div>`;
+    });
+    html += '</div>';
+    section.innerHTML = html;
+  }
+
+  function showMatchEnd() {
+    if (!matchState) return;
+    document.getElementById('winner-title').textContent = matchState.winMessage || 'Match Over';
+    document.getElementById('winner-team-name').textContent = matchState.winner || '';
+
+    const scoresHTML = matchState.teams.map(t => {
+      const o = Math.floor(t.balls / 6);
+      const b = t.balls % 6;
+      return `<div class="final-score-line"><span>${t.name}</span> — ${t.runs}/${t.wickets} (${o}.${b} overs)</div>`;
+    }).join('');
+    document.getElementById('final-scores').innerHTML = scoresHTML;
+
+    App.navigate('match-end');
+    Animations.celebrate();
+  }
+
+  function updateAuthBanner() {
+    const banner = el('tournament-auth-banner');
+    if (!banner) return;
+    if (isAuthenticated) {
+      banner.className = 'auth-banner authenticated';
+      banner.querySelector('span').textContent = '✅ Authenticated — You are controlling this match';
+    } else {
+      banner.className = 'auth-banner';
+      banner.querySelector('span').textContent = '🔒 Authenticate to control scoring';
+    }
+  }
+
+  function authenticate(code) {
+    if (code === AUTH_CODE) {
+      isAuthenticated = true;
+      updateAuthBanner();
+      if (matchState) FirebaseSync.syncState(matchState);
+      return true;
+    }
+    return false;
+  }
+
+  function resetMatch(code) {
+    if (code === RESET_CODE) {
+      matchState = null;
+      isAuthenticated = false;
+      FirebaseSync.resetMatch();
+      return true;
+    }
+    return false;
+  }
+
+  function getIsAuthenticated() { return isAuthenticated; }
+  function getState() { return matchState; }
+
+  return {
+    initSetup, startMatch, joinLiveMatch, handleAction, authenticate, resetMatch,
+    getIsAuthenticated, getState, updateScoreboard, showMatchEnd, updateAuthBanner, renderPlayerList
+  };
+})();
