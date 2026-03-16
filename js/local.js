@@ -88,10 +88,22 @@ const LocalMode = (() => {
 
     // Create and register new match listener
     matchListener = (data) => {
-      if (!isAuthenticated && data) {
+      if (data) {
+        if (data.teams) {
+          data.teams.forEach(t => {
+            t.ballHistory = t.ballHistory || [];
+            t.currentOver = t.currentOver || [];
+            t.overSummaries = t.overSummaries || [];
+            t.players = t.players || [];
+          });
+        }
         // Don't overwrite our new match state with an old finished match
         if (data.isMatchOver && matchState && !matchState.isMatchOver) {
           return;
+        }
+        // Trigger animation for remote events
+        if (data.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== data.lastEvent.timestamp)) {
+          Animations.show(data.lastEvent.type);
         }
         matchState = data;
         updateScoreboard();
@@ -131,7 +143,19 @@ const LocalMode = (() => {
 
     // Register listener for real-time updates
     matchListener = (updatedData) => {
-      if (!isAuthenticated && updatedData) {
+      if (updatedData) {
+        if (updatedData.teams) {
+          updatedData.teams.forEach(t => {
+            t.ballHistory = t.ballHistory || [];
+            t.currentOver = t.currentOver || [];
+            t.overSummaries = t.overSummaries || [];
+            t.players = t.players || [];
+          });
+        }
+        // Trigger animation for remote events
+        if (updatedData.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== updatedData.lastEvent.timestamp)) {
+          Animations.show(updatedData.lastEvent.type);
+        }
         matchState = updatedData;
         updateScoreboard();
         if (updatedData.isMatchOver) {
@@ -207,6 +231,9 @@ const LocalMode = (() => {
 
     // Sync to Firebase if authenticated
     if (isAuthenticated) {
+      if (animType) {
+        matchState.lastEvent = { type: animType, timestamp: Date.now() };
+      }
       FirebaseSync.syncState(matchState);
     }
 
