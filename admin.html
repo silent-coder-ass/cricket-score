@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Dashboard — QCS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ======= LOGIN SCREEN ======= -->
+  <section id="admin-login" class="admin-screen active">
+    <div class="login-container">
+      <div class="login-logo">🛡️</div>
+      <h1 class="login-title">Admin Panel</h1>
+      <p class="login-subtitle">Quick Cricket Score — Control Center</p>
+      <form id="login-form" autocomplete="off">
+        <div class="input-group">
+          <label for="admin-id">Admin ID</label>
+          <input type="text" id="admin-id" placeholder="Enter admin ID" required>
+        </div>
+        <div class="input-group">
+          <label for="admin-pass">Password</label>
+          <input type="password" id="admin-pass" placeholder="Enter password" required>
+        </div>
+        <p id="login-error" class="login-error"></p>
+        <button type="submit" class="login-btn">Login <span>→</span></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ======= DASHBOARD SCREEN ======= -->
+  <section id="admin-dashboard" class="admin-screen">
+
+    <!-- Top Bar -->
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <span class="topbar-logo">🛡️</span>
+        <h2>Admin Dashboard</h2>
+      </div>
+      <div class="topbar-right">
+        <span id="admin-clock" class="topbar-clock"></span>
+        <button id="btn-logout" class="topbar-btn">Logout</button>
+      </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-active-users">0</span>
+          <span class="stat-label">Active Users</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏏</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-live-matches">0</span>
+          <span class="stat-label">Live Matches</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-matches-today">0</span>
+          <span class="stat-label">Matches Today</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📍</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-locations">0</span>
+          <span class="stat-label">Locations</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav Tabs -->
+    <div class="dash-tabs">
+      <button class="dash-tab active" data-tab="tab-matches">Live Matches</button>
+      <button class="dash-tab" data-tab="tab-users">Active Users</button>
+      <button class="dash-tab" data-tab="tab-map">User Map</button>
+      <button class="dash-tab" data-tab="tab-settings">Settings</button>
+    </div>
+
+    <!-- Tab: Live Matches -->
+    <div id="tab-matches" class="tab-content active">
+      <div id="admin-matches-list" class="matches-grid">
+        <p class="empty-state">No live matches right now.</p>
+      </div>
+    </div>
+
+    <!-- Tab: Active Users -->
+    <div id="tab-users" class="tab-content">
+      <div id="admin-users-list" class="users-table-wrap">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Device</th>
+              <th>Location</th>
+              <th>Match</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab: Map -->
+    <div id="tab-map" class="tab-content">
+      <div id="user-map" class="map-container"></div>
+    </div>
+
+    <!-- Tab: Settings -->
+    <div id="tab-settings" class="tab-content">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>Site Settings</h3>
+          <div class="input-group">
+            <label for="setting-title">Website Title</label>
+            <input type="text" id="setting-title" placeholder="Quick Cricket Score">
+          </div>
+          <div class="input-group">
+            <label for="setting-overs">Default Overs</label>
+            <input type="number" id="setting-overs" min="1" max="50" value="5">
+          </div>
+          <div class="input-group">
+            <label for="setting-players">Default Players</label>
+            <input type="number" id="setting-players" min="2" max="11" value="11">
+          </div>
+          <div class="toggle-group">
+            <label>Animations Enabled</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="setting-animations" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button id="btn-save-settings" class="save-btn">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Match Control Modal -->
+    <div id="match-control-modal" class="admin-modal" style="display:none;">
+      <div class="admin-modal-content">
+        <div class="modal-header">
+          <h3 id="control-modal-title">Match Control</h3>
+          <button id="control-modal-close" class="modal-close-btn">✕</button>
+        </div>
+        <div class="control-score-display">
+          <span id="control-team-a">Team A</span>
+          <span class="control-vs">vs</span>
+          <span id="control-team-b">Team B</span>
+        </div>
+        <div class="control-current-score">
+          <span id="control-score">0/0</span>
+          <span id="control-overs">(0.0 ov)</span>
+        </div>
+        <div class="control-buttons">
+          <button class="ctrl-btn run-btn" data-ctrl="0">Dot</button>
+          <button class="ctrl-btn run-btn" data-ctrl="1">+1</button>
+          <button class="ctrl-btn run-btn" data-ctrl="2">+2</button>
+          <button class="ctrl-btn run-btn" data-ctrl="3">+3</button>
+          <button class="ctrl-btn four-btn" data-ctrl="4">+4</button>
+          <button class="ctrl-btn six-btn" data-ctrl="6">+6</button>
+          <button class="ctrl-btn wide-btn" data-ctrl="wide">Wide</button>
+          <button class="ctrl-btn nb-btn" data-ctrl="noball">No Ball</button>
+          <button class="ctrl-btn out-btn" data-ctrl="out">Wicket</button>
+          <button class="ctrl-btn undo-btn" data-ctrl="undo">Undo</button>
+        </div>
+        <div class="control-danger-zone">
+          <button id="ctrl-reset" class="danger-btn">🗑️ Reset Match</button>
+          <button id="ctrl-end" class="danger-btn end-btn">🏁 End Match</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

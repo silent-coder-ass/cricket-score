@@ -150,10 +150,39 @@ const FirebaseSync = (() => {
     }
   }
 
+  // ===== Session Tracking (for Admin Analytics) =====
+  function trackSession(sessionData) {
+    if (!db || !sessionData || !sessionData.sessionId) return;
+    try {
+      db.ref('analytics/sessions/' + sessionData.sessionId).set(sessionData);
+    } catch(e) {
+      console.warn('Session track failed:', e);
+    }
+  }
+
+  function removeSession(sessionId) {
+    if (!db || !sessionId) return;
+    try {
+      db.ref('analytics/sessions/' + sessionId).remove();
+    } catch(e) {
+      console.warn('Session remove failed:', e);
+    }
+  }
+
+  function updateSessionMatch(sessionId, matchLabel) {
+    if (!db || !sessionId) return;
+    try {
+      db.ref('analytics/sessions/' + sessionId + '/matchViewed').set(matchLabel);
+    } catch(e) {
+      console.warn('Session update failed:', e);
+    }
+  }
+
   return { 
     init, syncState, 
     listenMatch, removeMatchCallback, stopListeningMatch, 
     listenAllMatches, stopListeningAll,
-    resetMatch 
+    resetMatch,
+    trackSession, removeSession, updateSessionMatch
   };
 })();
