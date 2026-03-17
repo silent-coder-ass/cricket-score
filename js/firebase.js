@@ -14,10 +14,18 @@ const FirebaseSync = (() => {
   };
 
   let db = null;
-  let matchRef = null;
-  let isListening = false;
-  let listener = null;
-  let callbacks = [];
+  let activeMatchesRef = null;
+  
+  // Single match listening
+  let currentMatchRef = null;
+  let isListeningMatch = false;
+  let matchListener = null;
+  let matchCallbacks = [];
+
+  // All matches listening
+  let isListeningAll = false;
+  let allMatchesListener = null;
+  let allMatchesCallbacks = [];
 
   /**
    * Initialize Firebase
@@ -28,7 +36,7 @@ const FirebaseSync = (() => {
         firebase.initializeApp(firebaseConfig);
       }
       db = firebase.database();
-      matchRef = db.ref('matches/current');
+      activeMatchesRef = db.ref('matches/current');
     } catch (e) {
       console.warn('Firebase init failed:', e);
     }
@@ -38,9 +46,13 @@ const FirebaseSync = (() => {
    * Push match state to Firebase (only authenticated devices should call)
    */
   function syncState(state) {
-    if (!matchRef) return;
+    if (!db || !state || !state.id) return;
     try {
-      matchRef.set(state);
+      // Create a lightweight copy to avoid uploading large history array
+      const syncData = { ...state };
+      delete syncData.history; // Only needed locally on scoring device
+      
+      db.ref('matches/current/' + state.id).set(syncData);
     } catch (e) {
       console.warn('Firebase sync failed:', e);
     }
@@ -49,62 +61,99 @@ const FirebaseSync = (() => {
   /**
    * Listen for real-time updates (allows multiple listeners)
    */
-  function listen(callback) {
-    if (!matchRef) return;
+  function listenMatch(matchId, callback) {
+    if (!db || !matchId) return;
+    
+    // Switch to new match if different
+    if (currentMatchRef && currentMatchRef.key !== matchId) {
+      stopListeningMatch();
+    }
+    
+    currentMatchRef = db.ref('matches/current/' + matchId);
     
     // Add callback to the pool
-    if (!callbacks.includes(callback)) {
-      callbacks.push(callback);
+    if (!matchCallbacks.includes(callback)) {
+      matchCallbacks.push(callback);
     }
     
     // Attach Firebase listener if not already active
-    if (!isListening) {
-      isListening = true;
-      listener = matchRef.on('value', (snapshot) => {
+    if (!isListeningMatch) {
+      isListeningMatch = true;
+      matchListener = currentMatchRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-          callbacks.forEach(cb => cb(data));
-        }
+        if (data) Object.assign(data, { id: snapshot.key }); // Ensure ID is present
+        matchCallbacks.forEach(cb => cb(data)); // pass data, even if null (deleted)
       });
     }
   }
 
   /**
-   * Remove a specific callback without killing the listener
+   * Listen for all active matches (for home screen)
    */
-  function removeCallback(callback) {
-    callbacks = callbacks.filter(cb => cb !== callback);
-    // If no callbacks remain, detach the Firebase listener
-    if (callbacks.length === 0 && matchRef && listener) {
-      matchRef.off('value', listener);
-      listener = null;
-      isListening = false;
+  function listenAllMatches(callback) {
+    if (!activeMatchesRef) return;
+    
+    if (!allMatchesCallbacks.includes(callback)) {
+      allMatchesCallbacks.push(callback);
+    }
+    
+    if (!isListeningAll) {
+      isListeningAll = true;
+      allMatchesListener = activeMatchesRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        const matches = [];
+        if (data) {
+          Object.keys(data).forEach(key => {
+            const m = data[key];
+            m.id = key;
+            matches.push(m);
+          });
+        }
+        allMatchesCallbacks.forEach(cb => cb(matches));
+      });
     }
   }
 
-  /**
-   * Stop listening (removes all callbacks)
-   */
-  function stopListening() {
-    if (matchRef && listener) {
-      matchRef.off('value', listener);
-      listener = null;
-      isListening = false;
-      callbacks = [];
+  function removeMatchCallback(callback) {
+    matchCallbacks = matchCallbacks.filter(cb => cb !== callback);
+    if (matchCallbacks.length === 0 && currentMatchRef && matchListener) {
+      currentMatchRef.off('value', matchListener);
+      matchListener = null;
+      isListeningMatch = false;
     }
   }
 
-  /**
-   * Reset match data in Firebase
-   */
-  function resetMatch() {
-    if (!matchRef) return;
+  function stopListeningMatch() {
+    if (currentMatchRef && matchListener) {
+      currentMatchRef.off('value', matchListener);
+      matchListener = null;
+      isListeningMatch = false;
+      matchCallbacks = [];
+    }
+  }
+
+  function stopListeningAll() {
+    if (activeMatchesRef && allMatchesListener) {
+      activeMatchesRef.off('value', allMatchesListener);
+      allMatchesListener = null;
+      isListeningAll = false;
+      allMatchesCallbacks = [];
+    }
+  }
+
+  function resetMatch(matchId) {
+    if (!db || !matchId) return;
     try {
-      matchRef.remove();
+      db.ref('matches/current/' + matchId).remove();
     } catch (e) {
       console.warn('Firebase reset failed:', e);
     }
   }
 
-  return { init, syncState, listen, removeCallback, stopListening, resetMatch };
+  return { 
+    init, syncState, 
+    listenMatch, removeMatchCallback, stopListeningMatch, 
+    listenAllMatches, stopListeningAll,
+    resetMatch 
+  };
 })();

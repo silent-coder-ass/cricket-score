@@ -33,8 +33,10 @@ const CricketEngine = (() => {
     };
 
     return {
-      mode: config.mode, // 'local' or 'tournament'
-      totalOvers: config.totalOvers,
+      id: Date.now().toString(36) + Math.random().toString(36).substring(2, 7),
+      mode: config.mode || 'local', // 'local' or 'tournament'
+      tournamentName: config.tournamentName || '',
+      totalOvers: config.totalOvers || 5,
       playersPerTeam: config.playersPerTeam,
       maxWickets: maxWickets,
       currentInnings: 0, // 0 = first innings (team index 0 bats), 1 = second innings
@@ -69,7 +71,9 @@ const CricketEngine = (() => {
         }
       ],
       // Tournament extras
-      tournamentName: config.tournamentName || ''
+      tournamentName: config.tournamentName || '',
+      // Security
+      hostPassword: config.hostPassword || ''
     };
   }
 
@@ -88,10 +92,45 @@ const CricketEngine = (() => {
   }
 
   /**
+   * Save strict state deep clone for undo functionality
+   */
+  function pushHistory(state) {
+    if (!state.history) state.history = [];
+    // Destructure to omit history from clone object payload
+    const { history, ...stateData } = state;
+    state.history.push(JSON.parse(JSON.stringify(stateData)));
+    if (state.history.length > 5) {
+      state.history.shift();
+    }
+  }
+
+  /**
+   * Revert state to last saved point
+   */
+  function undo(state) {
+    if (!state.history || state.history.length === 0) return false;
+    const prevState = state.history.pop();
+    const historyRef = state.history;
+    
+    // Clear current fields
+    for (let k in state) {
+      delete state[k];
+    }
+    // Re-assign previous state fields
+    Object.assign(state, prevState);
+    state.history = historyRef;
+    
+    // Assign a silent event to trigger an update locally, but without celebrating
+    state.lastEvent = { type: 'undo', timestamp: Date.now() };
+    return true;
+  }
+
+  /**
    * Add runs (1-6 or 0 for dot)
    */
   function addRuns(state, runs) {
     if (state.isMatchOver) return state;
+    pushHistory(state);
     const team = getBattingTeam(state);
     team.runs += runs;
     team.balls += 1;
@@ -115,6 +154,7 @@ const CricketEngine = (() => {
    */
   function addWide(state) {
     if (state.isMatchOver) return state;
+    pushHistory(state);
     const team = getBattingTeam(state);
     team.runs += 1;
     team.currentOver.push({ label: 'WD', class: 'wide' });
@@ -128,6 +168,7 @@ const CricketEngine = (() => {
    */
   function addNoBall(state) {
     if (state.isMatchOver) return state;
+    pushHistory(state);
     const team = getBattingTeam(state);
     team.runs += 1;
     team.currentOver.push({ label: 'NB', class: 'noball' });
@@ -141,6 +182,7 @@ const CricketEngine = (() => {
    */
   function addWicket(state) {
     if (state.isMatchOver) return state;
+    pushHistory(state);
     const team = getBattingTeam(state);
     team.wickets += 1;
     team.balls += 1;
@@ -307,6 +349,7 @@ const CricketEngine = (() => {
     getRemainingBalls,
     getRequiredRuns,
     getPlayersRemaining,
-    getOversDisplay
+    getOversDisplay,
+    undo
   };
 })();

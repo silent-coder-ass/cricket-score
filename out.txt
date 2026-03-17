@@ -1,0 +1,5 @@
+Opening file:///Users/sanuwarhussain/Desktop/Work/cricket-score/index.html
+Clicking btn-local-mode
+Clicking btn-start-local
+Clicking home btn
+Closing browser

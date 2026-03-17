@@ -74,8 +74,8 @@ input, button {
 }
 
 @keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 /* ================================================
@@ -103,9 +103,9 @@ input, button {
 }
 
 @keyframes logoBounce {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-10px) rotate(-5deg); }
-  75% { transform: translateY(-4px) rotate(3deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  25% { transform: translate3d(0, -10px, 0) rotate(-5deg); }
+  75% { transform: translate3d(0, -4px, 0) rotate(3deg); }
 }
 
 .app-title {
@@ -134,20 +134,26 @@ input, button {
 
 /* Live Match Banner */
 .live-match-banner {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
   border-radius: var(--radius);
-  padding: 18px 24px;
-  width: 100%;
+  padding: 16px;
   text-align: center;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 24px;
+  display: block;
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.15);
   animation: fadeSlideIn 0.5s ease;
+  transform: translateZ(0); /* Hardware Acceleration Trigger */
 }
 
 .live-match-banner:active {
   transform: scale(0.97);
+}
+
+.live-matches-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .live-badge {
@@ -175,9 +181,9 @@ input, button {
 }
 
 @keyframes pulseRed {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  0% { transform: scale(0.95) translateZ(0); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  70% { transform: scale(1) translateZ(0); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95) translateZ(0); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 .live-match-teams {
@@ -289,12 +295,13 @@ input, button {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.25);
-  transform: scale(0);
+  transform: scale(0) translateZ(0);
+  will-change: transform, opacity;
   animation: rippleAnim 0.6s ease-out forwards;
 }
 
 @keyframes rippleAnim {
-  to { transform: scale(4); opacity: 0; }
+  to { transform: scale(4) translateZ(0); opacity: 0; }
 }
 
 /* ================================================
@@ -472,14 +479,17 @@ input, button {
 }
 
 /* Setup Cards */
+
 .setup-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: 16px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  will-change: transform, opacity;
   animation: fadeSlideIn 0.5s ease;
+  transform: translateZ(0); /* Hardware Acceleration Trigger */
 }
 
 .setup-card-header {
@@ -562,15 +572,28 @@ input, button {
   outline: none;
 }
 
-/* Glow Button */
+/* Glow Button Optimized for Weak Androids */
 .glow-btn {
-  box-shadow: 0 4px 24px rgba(0, 229, 255, 0.25);
-  animation: glowPulse 2s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
 }
 
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 4px 24px rgba(0, 229, 255, 0.2); }
-  50% { box-shadow: 0 4px 36px rgba(0, 229, 255, 0.4); }
+.glow-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 4px 24px rgba(0, 229, 255, 0.4);
+  opacity: 0.5;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  will-change: opacity;
+  animation: glowPulseOptimized 2s ease-in-out infinite;
+}
+
+@keyframes glowPulseOptimized {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 /* ================================================
@@ -780,9 +803,9 @@ input, button {
 }
 
 @keyframes scoreUpdate {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.2); color: var(--accent); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1) translateZ(0); }
+  50%  { transform: scale(1.2) translateZ(0); color: var(--accent); }
+  100% { transform: scale(1) translateZ(0); }
 }
 
 .score-separator {
@@ -895,12 +918,13 @@ input, button {
   font-weight: 700;
   background: var(--bg-secondary);
   color: var(--text-primary);
+  will-change: transform;
   animation: ballPop 0.25s ease;
 }
 
 @keyframes ballPop {
-  from { transform: scale(0); }
-  to   { transform: scale(1); }
+  from { transform: scale(0) translateZ(0); }
+  to   { transform: scale(1) translateZ(0); }
 }
 
 .ball-tag.four {
@@ -1006,7 +1030,7 @@ input, button {
 
 .extra-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
 }
 
@@ -1027,6 +1051,18 @@ input, button {
 
 .extra-btn:active {
   transform: scale(0.93);
+}
+
+/* Custom Undo Button Style */
+.extra-btn.undo {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.extra-btn.undo:active {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .extra-btn.wide {
@@ -1105,12 +1141,13 @@ input, button {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  will-change: transform, opacity;
   animation: particleFall linear forwards;
 }
 
 @keyframes particleFall {
-  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  0%   { transform: translate3d(0, -20px, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(0, 100vh, 0) rotate(720deg); opacity: 0; }
 }
 
 .winner-card {
@@ -1123,24 +1160,27 @@ input, button {
   text-align: center;
   width: 100%;
   max-width: 360px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  will-change: transform, opacity;
+  transform: translateZ(0);
   animation: winnerSlideIn 0.5s ease;
 }
 
 @keyframes winnerSlideIn {
-  from { opacity: 0; transform: scale(0.9) translateY(20px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.9); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 
 .trophy-icon {
   font-size: 4rem;
+  will-change: transform;
   animation: trophyBounce 1.5s ease-in-out infinite;
 }
 
 @keyframes trophyBounce {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-10px) scale(1.1); }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -10px, 0) scale(1.1); }
 }
 
 .winner-title {
@@ -1204,12 +1244,13 @@ input, button {
   padding: 24px;
   width: 100%;
   max-width: 360px;
+  will-change: transform, opacity;
   animation: modalIn 0.25s ease;
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.9) translateZ(0); }
+  to   { opacity: 1; transform: scale(1) translateZ(0); }
 }
 
 .modal h3 {
@@ -1303,14 +1344,15 @@ input, button {
   font-size: 4rem;
   font-weight: 900;
   text-transform: uppercase;
+  will-change: transform, opacity;
   animation: eventPulse 1s ease forwards;
 }
 
 @keyframes eventPulse {
-  0%   { transform: scale(0); opacity: 0; }
-  30%  { transform: scale(1.3); opacity: 1; }
-  70%  { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.8); opacity: 0; }
+  0%   { transform: scale(0) translateZ(0); opacity: 0; }
+  30%  { transform: scale(1.3) translateZ(0); opacity: 1; }
+  70%  { transform: scale(1) translateZ(0); opacity: 1; }
+  100% { transform: scale(0.8) translateZ(0); opacity: 0; }
 }
 
 .event-text.four-text {
@@ -1343,12 +1385,13 @@ input, button {
   color: var(--text-secondary);
   margin-top: 4px;
   font-weight: 500;
+  will-change: transform, opacity;
   animation: eventFade 1s ease forwards;
 }
 
 @keyframes eventFade {
-  0%   { opacity: 0; transform: translateY(10px); }
-  30%  { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translate3d(0, 10px, 0); }
+  30%  { opacity: 1; transform: translate3d(0, 0, 0); }
   70%  { opacity: 1; }
   100% { opacity: 0; }
 }

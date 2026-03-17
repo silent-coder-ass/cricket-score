@@ -65,33 +65,68 @@ const App = (() => {
     // Init Firebase
     FirebaseSync.init();
 
-    // Start listening globally for active match to show Live Banner
-    const liveBanner = document.getElementById('live-match-banner');
-    const liveTeams = document.getElementById('live-match-teams');
-    let globalLiveMatchState = null;
+    // Start listening globally for active matches to show on Home Screen
+    const matchesContainer = document.getElementById('live-matches-container');
+    let globalMatchesMap = {};
 
-    FirebaseSync.listen((data) => {
-      if (data && !data.isMatchOver) {
-        globalLiveMatchState = data;
-        if (liveBanner && liveTeams) {
-          liveBanner.style.display = 'block';
-          liveTeams.textContent = `${data.teams[0].name} vs ${data.teams[1].name}`;
-        }
-      } else {
-        globalLiveMatchState = null;
-        if (liveBanner) {
-          liveBanner.style.display = 'none';
-        }
+    FirebaseSync.listenAllMatches((matches) => {
+      if (!matchesContainer) return;
+
+      // Ensure we clear mapping on each update to prevent old ghost matches
+      globalMatchesMap = {};
+      
+      // Filter to only true match objects that aren't over
+      const activeMatches = matches.filter(m => 
+        m && 
+        typeof m === 'object' && 
+        m.id && 
+        m.teams && 
+        m.mode && 
+        !m.isMatchOver
+      );
+      
+      if (activeMatches.length === 0) {
+        matchesContainer.innerHTML = '';
+        return;
       }
+
+      let html = '';
+      activeMatches.forEach(match => {
+        globalMatchesMap[match.id] = match;
+        const modeLabel = match.mode === 'tournament' ? '🏆 Tournament' : '🏠 Local';
+        
+        let teamAtxt = 'Team A';
+        let teamBtxt = 'Team B';
+        if (match.teams && match.teams.length >= 2) {
+           teamAtxt = match.teams[0].name || 'Team A';
+           teamBtxt = match.teams[1].name || 'Team B';
+        }
+
+        html += `
+          <div class="live-match-banner" data-match-id="${match.id}" style="display: block; margin-bottom: 12px; cursor: pointer;">
+            <div class="live-badge"><span></span>LIVE ${modeLabel}</div>
+            <div class="live-match-teams">${teamAtxt} vs ${teamBtxt}</div>
+            <div class="live-match-desc">Tap to View Score</div>
+          </div>
+        `;
+      });
+      matchesContainer.innerHTML = html;
     });
 
-    if (liveBanner) {
-      liveBanner.addEventListener('click', () => {
-        if (!globalLiveMatchState) return;
-        if (globalLiveMatchState.mode === 'local') {
-          LocalMode.joinLiveMatch(globalLiveMatchState);
-        } else if (globalLiveMatchState.mode === 'tournament') {
-          TournamentMode.joinLiveMatch(globalLiveMatchState);
+    if (matchesContainer) {
+      matchesContainer.addEventListener('click', (e) => {
+        const card = e.target.closest('.live-match-banner');
+        if (!card) return;
+        
+        const matchId = card.getAttribute('data-match-id');
+        const matchState = globalMatchesMap[matchId];
+        
+        if (!matchState) return;
+        
+        if (matchState.mode === 'local') {
+          LocalMode.joinLiveMatch(matchState);
+        } else if (matchState.mode === 'tournament') {
+          TournamentMode.joinLiveMatch(matchState);
         }
       });
     }

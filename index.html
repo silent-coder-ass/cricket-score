@@ -24,12 +24,8 @@
         <p class="app-tagline">Premium Live Scoring</p>
       </div>
       
-      <!-- Live Match Banner (Hidden by default) -->
-      <div id="live-match-banner" class="live-match-banner" style="display: none;">
-        <div class="live-badge"><span></span>LIVE MATCH</div>
-        <div class="live-match-teams" id="live-match-teams">Team A vs Team B</div>
-        <div class="live-match-desc">Tap to View Score</div>
-      </div>
+      <!-- Live Matches Container -->
+      <div id="live-matches-container" class="live-matches-container"></div>
       
       <div class="mode-buttons">
         <button class="mode-btn local-btn" id="btn-local-mode" data-navigate="local-setup">
@@ -54,14 +50,6 @@
           </div>
           <div class="ripple-container"></div>
         </button>
-      </div>
-
-      <div class="creator-credit">
-        Made ❤️ by <strong>SANUWAR HUSSAIN</strong>
-        <a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn">
-          <svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-          Follow on Instagram
-        </a>
       </div>
     </div>
   </section>
@@ -88,12 +76,12 @@
           <div class="teams-row">
             <div class="form-group team-input-group">
               <label for="local-teamA">🔵 Team A</label>
-              <input type="text" id="local-teamA" placeholder="e.g. India" required>
+              <input type="text" id="local-teamA" placeholder="e.g. India">
             </div>
             <div class="teams-vs-badge">VS</div>
             <div class="form-group team-input-group">
               <label for="local-teamB">🔴 Team B</label>
-              <input type="text" id="local-teamB" placeholder="e.g. Australia" required>
+              <input type="text" id="local-teamB" placeholder="e.g. Australia">
             </div>
           </div>
         </div>
@@ -127,6 +115,10 @@
               <label for="local-players">👥 Players</label>
               <input type="number" id="local-players" placeholder="e.g. 8" min="2" max="11" required>
             </div>
+          </div>
+          <div class="form-group" style="margin-top: 15px;">
+            <label for="local-host-password">🔐 Host Control Password (required)</label>
+            <input type="password" id="local-host-password" placeholder="Choose a password" required>
           </div>
           <div class="players-info" id="local-players-info"></div>
         </div>
@@ -182,6 +174,10 @@
           <input type="number" id="tournament-players" placeholder="e.g. 11" min="2" max="11" required>
         </div>
         <div id="tournament-player-names-section" class="player-names-section"></div>
+        <div class="form-group" style="margin-top: 15px;">
+          <label for="tournament-host-password">🔐 Host Control Password (required)</label>
+          <input type="password" id="tournament-host-password" placeholder="Choose a password" required>
+        </div>
         <div class="players-info" id="tournament-players-info"></div>
         <button type="submit" class="start-btn" id="btn-start-tournament">
           <span>Start Tournament Match</span>
@@ -270,6 +266,7 @@
           <button class="extra-btn wide" data-action="wide">Wide</button>
           <button class="extra-btn noball" data-action="noball">No Ball</button>
           <button class="extra-btn out" data-action="out">OUT</button>
+          <button class="extra-btn undo" data-action="undo">↩ Undo</button>
         </div>
       </div>
 
@@ -371,6 +368,7 @@
           <button class="extra-btn wide" data-action="wide">Wide</button>
           <button class="extra-btn noball" data-action="noball">No Ball</button>
           <button class="extra-btn out" data-action="out">OUT</button>
+          <button class="extra-btn undo" data-action="undo">↩ Undo</button>
         </div>
       </div>
 
@@ -404,9 +402,9 @@
   <!-- ==================== AUTH MODAL ==================== -->
   <div class="modal-overlay" id="auth-modal">
     <div class="modal">
-      <h3>🔐 Device Authentication</h3>
-      <p>Enter authentication code to control scoring</p>
-      <input type="password" id="auth-code-input" placeholder="Enter code" class="modal-input">
+      <h3>🔐 Host Authentication</h3>
+      <p>Enter host password to control scoring</p>
+      <input type="password" id="auth-code-input" placeholder="Enter password" class="modal-input">
       <div class="modal-error" id="auth-error"></div>
       <div class="modal-actions">
         <button class="modal-btn cancel" id="auth-cancel">Cancel</button>
@@ -419,8 +417,8 @@
   <div class="modal-overlay" id="delete-modal">
     <div class="modal">
       <h3>🗑️ Delete Match</h3>
-      <p>Enter authentication code to permanently delete this live match</p>
-      <input type="password" id="delete-code-input" placeholder="Enter auth code" class="modal-input">
+      <p>Enter host password to permanently delete this live match</p>
+      <input type="password" id="delete-code-input" placeholder="Enter password" class="modal-input">
       <div class="modal-error" id="delete-error"></div>
       <div class="modal-actions">
         <button class="modal-btn cancel" id="delete-cancel">Cancel</button>

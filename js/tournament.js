@@ -7,9 +7,6 @@ const TournamentMode = (() => {
   let isAuthenticated = false;
   let matchListener = null;
 
-  const AUTH_CODE = '456838';
-  const RESET_CODE = '6000040312';
-
   const el = (id) => document.getElementById(id);
 
   /**
@@ -95,6 +92,7 @@ const TournamentMode = (() => {
     const captainB = el('tournament-captainB').value.trim() || '';
     const overs = parseInt(el('tournament-overs').value) || 10;
     const players = parseInt(el('tournament-players').value) || 11;
+    const hostPassword = el('tournament-host-password').value.trim();
 
     // Gather player names
     const playersA = [];
@@ -115,10 +113,14 @@ const TournamentMode = (() => {
       playersPerTeam: players,
       playersA, playersB,
       tournamentName,
-      batFirst: batFirst
+      batFirst: batFirst,
+      hostPassword: hostPassword
     });
 
-    isAuthenticated = false;
+    // Upload instantly to Firebase so viewers see it on the Home Screen immediately
+    FirebaseSync.syncState(matchState);
+
+    isAuthenticated = true; // Auto-authenticate the host creator
     updateAuthBanner();
     updateScoreboard();
     renderPlayerList();
@@ -131,7 +133,7 @@ const TournamentMode = (() => {
 
     // Clean up previous match listener if any
     if (matchListener) {
-      FirebaseSync.removeCallback(matchListener);
+      FirebaseSync.removeMatchCallback(matchListener);
     }
 
     // Create and register new match listener
@@ -153,7 +155,10 @@ const TournamentMode = (() => {
         if (data.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== data.lastEvent.timestamp)) {
           Animations.show(data.lastEvent.type);
         }
+        // Preserve local history (since it's not synced from Firebase)
+        const localHistory = matchState && matchState.history ? matchState.history : [];
         matchState = data;
+        matchState.history = localHistory;
         updateScoreboard();
         renderPlayerList();
         if (data.isMatchOver) {
@@ -163,7 +168,7 @@ const TournamentMode = (() => {
     };
 
     // Start listening for real-time updates from Firebase
-    FirebaseSync.listen(matchListener);
+    FirebaseSync.listenMatch(matchState.id, matchListener);
   }
 
   /**
@@ -188,7 +193,7 @@ const TournamentMode = (() => {
 
     // Clean up previous match listener if any
     if (matchListener) {
-      FirebaseSync.removeCallback(matchListener);
+      FirebaseSync.removeMatchCallback(matchListener);
     }
 
     // Register listener for real-time updates
@@ -206,7 +211,10 @@ const TournamentMode = (() => {
         if (updatedData.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== updatedData.lastEvent.timestamp)) {
           Animations.show(updatedData.lastEvent.type);
         }
+        // Preserve local history
+        const localHistory = matchState && matchState.history ? matchState.history : [];
         matchState = updatedData;
+        matchState.history = localHistory;
         updateScoreboard();
         renderPlayerList();
         if (updatedData.isMatchOver) {
@@ -214,7 +222,7 @@ const TournamentMode = (() => {
         }
       }
     };
-    FirebaseSync.listen(matchListener);
+    FirebaseSync.listenMatch(matchState.id, matchListener);
   }
 
   /**
@@ -236,6 +244,17 @@ const TournamentMode = (() => {
       case 'wide': CricketEngine.addWide(matchState); animType = 'wide'; break;
       case 'noball': CricketEngine.addNoBall(matchState); animType = 'noball'; break;
       case 'out':  CricketEngine.addWicket(matchState); animType = 'out'; break;
+      case 'undo': 
+        if (CricketEngine.undo(matchState)) {
+          // Trigger basic animation reflow to indicate an update happened
+          const runsEl = el('tournament-runs');
+          if (runsEl) {
+            runsEl.classList.remove('animate');
+            void runsEl.offsetWidth;
+            runsEl.classList.add('animate');
+          }
+        }
+        break;
       default: return;
     }
 
@@ -392,7 +411,7 @@ const TournamentMode = (() => {
   }
 
   function authenticate(code) {
-    if (code === AUTH_CODE) {
+    if (matchState && code === matchState.hostPassword) {
       isAuthenticated = true;
       updateAuthBanner();
       if (matchState) FirebaseSync.syncState(matchState);
@@ -402,14 +421,16 @@ const TournamentMode = (() => {
   }
 
   function deleteMatch(code) {
-    if (code === AUTH_CODE) {
+    if (matchState && code === matchState.hostPassword) {
+      if (isAuthenticated) {
+        if (matchListener) {
+          FirebaseSync.removeMatchCallback(matchListener);
+          matchListener = null;
+        }
+        FirebaseSync.resetMatch(matchState.id);
+      }
       matchState = null;
       isAuthenticated = false;
-      if (matchListener) {
-        FirebaseSync.removeCallback(matchListener);
-        matchListener = null;
-      }
-      FirebaseSync.resetMatch();
       return true;
     }
     return false;

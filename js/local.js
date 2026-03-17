@@ -7,9 +7,6 @@ const LocalMode = (() => {
   let isAuthenticated = false;
   let matchListener = null;
 
-  const AUTH_CODE = '456838';
-  const RESET_CODE = '6000040312';
-
   // DOM references (lazy)
   const el = (id) => document.getElementById(id);
 
@@ -63,16 +60,21 @@ const LocalMode = (() => {
     const overs = parseInt(el('local-overs').value) || 5;
     const players = parseInt(el('local-players').value) || 8;
     const batFirst = parseInt(el('local-bat-first').value) || 0;
+    const hostPassword = el('local-host-password').value.trim();
 
     matchState = CricketEngine.createMatch({
       mode: 'local',
       teamA, teamB,
       totalOvers: overs,
       playersPerTeam: players,
-      batFirst: batFirst
+      batFirst: batFirst,
+      hostPassword: hostPassword
     });
 
-    isAuthenticated = false;
+    // Upload instantly to Firebase so viewers see it on the Home Screen immediately
+    FirebaseSync.syncState(matchState);
+
+    isAuthenticated = true; // Auto-authenticate the host creator
     updateAuthBanner();
     updateScoreboard();
     // Clear old celebration
@@ -83,7 +85,7 @@ const LocalMode = (() => {
 
     // Clean up previous match listener if any
     if (matchListener) {
-      FirebaseSync.removeCallback(matchListener);
+      FirebaseSync.removeMatchCallback(matchListener);
     }
 
     // Create and register new match listener
@@ -105,7 +107,10 @@ const LocalMode = (() => {
         if (data.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== data.lastEvent.timestamp)) {
           Animations.show(data.lastEvent.type);
         }
+        // Preserve local history (since it's not synced from Firebase)
+        const localHistory = matchState && matchState.history ? matchState.history : [];
         matchState = data;
+        matchState.history = localHistory;
         updateScoreboard();
         if (data.isMatchOver) {
           showMatchEnd();
@@ -114,7 +119,7 @@ const LocalMode = (() => {
     };
 
     // Start listening for real-time updates from Firebase
-    FirebaseSync.listen(matchListener);
+    FirebaseSync.listenMatch(matchState.id, matchListener);
   }
 
   /**
@@ -138,7 +143,7 @@ const LocalMode = (() => {
 
     // Clean up previous match listener if any
     if (matchListener) {
-      FirebaseSync.removeCallback(matchListener);
+      FirebaseSync.removeMatchCallback(matchListener);
     }
 
     // Register listener for real-time updates
@@ -156,14 +161,19 @@ const LocalMode = (() => {
         if (updatedData.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== updatedData.lastEvent.timestamp)) {
           Animations.show(updatedData.lastEvent.type);
         }
+        // Preserve local history
+        const localHistory = matchState && matchState.history ? matchState.history : [];
         matchState = updatedData;
+        matchState.history = localHistory;
         updateScoreboard();
         if (updatedData.isMatchOver) {
           showMatchEnd();
         }
       }
     };
-    FirebaseSync.listen(matchListener);
+    FirebaseSync.listenMatch(matchState.id, matchListener);
+
+    App.navigate('local-match');
   }
 
   /**
@@ -209,6 +219,18 @@ const LocalMode = (() => {
       case 'out':
         CricketEngine.addWicket(matchState);
         animType = 'out';
+        break;
+      case 'undo':
+        if (CricketEngine.undo(matchState)) {
+          // Instead of passing animation, we just update without popping bubbles for undo
+          // But a small visual queue helps
+          const runsEl = el('local-runs');
+          if (runsEl) {
+            runsEl.classList.remove('animate');
+            void runsEl.offsetWidth; // trigger reflow
+            runsEl.classList.add('animate');
+          }
+        }
         break;
       default:
         return;
@@ -369,7 +391,7 @@ const LocalMode = (() => {
    * Authenticate device
    */
   function authenticate(code) {
-    if (code === AUTH_CODE) {
+    if (matchState && code === matchState.hostPassword) {
       isAuthenticated = true;
       updateAuthBanner();
       // Sync current state
@@ -385,14 +407,16 @@ const LocalMode = (() => {
    * Delete match (clears Firebase and local state)
    */
   function deleteMatch(code) {
-    if (code === AUTH_CODE) {
+    if (matchState && code === matchState.hostPassword) {
+      if (isAuthenticated) {
+        if (matchListener) {
+          FirebaseSync.removeMatchCallback(matchListener);
+          matchListener = null;
+        }
+        FirebaseSync.resetMatch(matchState.id);
+      }
       matchState = null;
       isAuthenticated = false;
-      if (matchListener) {
-        FirebaseSync.removeCallback(matchListener);
-        matchListener = null;
-      }
-      FirebaseSync.resetMatch();
       return true;
     }
     return false;
