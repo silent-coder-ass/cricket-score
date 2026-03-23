@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Quick Cricket Score — premium live cricket scoring tool. Score local and tournament matches in real-time with smooth animations.">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Quick Cricket Score</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ==================== HOME SCREEN ==================== -->
+  <section id="screen-home" class="screen active">
+    <div class="home-container">
+      <div class="logo-section">
+        <div class="logo-icon">🏏</div>
+        <h1 class="app-title">Quick Cricket<br><span>Score</span></h1>
+        <p class="app-tagline">Premium Live Scoring</p>
+      </div>
+      
+      <!-- Live Matches Container -->
+      <div id="live-matches-container" class="live-matches-container"></div>
+      
+      <div class="mode-buttons">
+        <button class="mode-btn local-btn" id="btn-local-mode" data-navigate="local-setup">
+          <div class="mode-btn-bg"></div>
+          <div class="mode-btn-content">
+            <div class="mode-icon">🏠</div>
+            <div class="mode-text">
+              <span class="mode-title">Local Score</span>
+              <span class="mode-desc">Quick match scoring</span>
+            </div>
+          </div>
+          <div class="ripple-container"></div>
+        </button>
+        <button class="mode-btn tournament-btn" id="btn-tournament-mode" data-navigate="tournament-setup">
+          <div class="mode-btn-bg"></div>
+          <div class="mode-btn-content">
+            <div class="mode-icon">🏆</div>
+            <div class="mode-text">
+              <span class="mode-title">Tournament Score</span>
+              <span class="mode-desc">Full match details</span>
+            </div>
+          </div>
+          <div class="ripple-container"></div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== LOCAL SETUP SCREEN ==================== -->
+  <section id="screen-local-setup" class="screen">
+    <div class="lsetup-wrapper">
+
+      <!-- Compact Header -->
+      <div class="lsetup-header">
+        <button class="back-btn lsetup-back" data-navigate="home">← Back</button>
+        <div class="lsetup-title-row">
+          <span class="lsetup-icon">🏏</span>
+          <div>
+            <h2 class="lsetup-title">Local Match</h2>
+            <p class="lsetup-sub">Configure and start scoring</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glass Setup Card -->
+      <form id="local-setup-form" class="lsetup-card">
+
+        <!-- Row 1: Teams -->
+        <div class="lsetup-grid-2">
+          <div class="lsetup-field">
+            <label class="lsetup-label">🔵 Team A</label>
+            <input type="text" id="local-teamA" class="lsetup-input" placeholder="Team A">
+          </div>
+          <div class="lsetup-field">
+            <label class="lsetup-label">🔴 Team B</label>
+            <input type="text" id="local-teamB" class="lsetup-input" placeholder="Team B">
+          </div>
+        </div>
+
+        <!-- Row 2: Overs + Players -->
+        <div class="lsetup-grid-2">
+          <div class="lsetup-field">
+            <label class="lsetup-label">🎯 Overs</label>
+            <input type="number" id="local-overs" class="lsetup-input" placeholder="10" min="1" max="50" required>
+          </div>
+          <div class="lsetup-field">
+            <label class="lsetup-label">👥 Players</label>
+            <input type="number" id="local-players" class="lsetup-input" placeholder="8" min="2" max="11" required>
+          </div>
+        </div>
+        <div class="players-info lsetup-players-info" id="local-players-info"></div>
+
+        <!-- Row 3: Batting First + Password -->
+        <div class="lsetup-grid-2">
+          <div class="lsetup-field" id="local-batting-group">
+            <label class="lsetup-label">🏏 Bat First</label>
+            <select id="local-bat-first" class="lsetup-input lsetup-select">
+              <option value="0">Team A</option>
+              <option value="1">Team B</option>
+            </select>
+          </div>
+          <div class="lsetup-field">
+            <label class="lsetup-label">🔐 Password</label>
+            <input type="password" id="local-host-password" class="lsetup-input" placeholder="Host secret" required>
+          </div>
+        </div>
+
+        <!-- Row 4: Toggles (inline) -->
+        <div class="lsetup-toggles">
+          <div class="lsetup-toggle-item">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-noball-run">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="lsetup-toggle-label">No Ball Runs</span>
+          </div>
+          <div class="lsetup-toggle-sep"></div>
+          <div class="lsetup-toggle-item">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-wide-run">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="lsetup-toggle-label">Wide Runs</span>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- Fixed-bottom Start Button -->
+      <div class="lsetup-footer">
+        <button type="submit" form="local-setup-form" class="lsetup-start-btn" id="btn-start-local">
+          🚀 Start Match
+        </button>
+        <div class="creator-credit lsetup-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ==================== TOURNAMENT SETUP SCREEN ==================== -->
+  <section id="screen-tournament-setup" class="screen">
+    <div class="setup-container">
+      <button class="back-btn" data-navigate="home">← Back</button>
+      <h2 class="setup-title">Tournament Match Setup</h2>
+      <form id="tournament-setup-form" class="setup-form">
+        <div class="form-group">
+          <label for="tournament-name">Tournament Name</label>
+          <input type="text" id="tournament-name" placeholder="Enter tournament name" required>
+        </div>
+        <div class="form-group">
+          <label for="tournament-teamA">Team A Name</label>
+          <input type="text" id="tournament-teamA" placeholder="Enter Team A name" required>
+        </div>
+        <div class="form-group">
+          <label for="tournament-teamB">Team B Name</label>
+          <input type="text" id="tournament-teamB" placeholder="Enter Team B name" required>
+        </div>
+        <div class="form-group" id="tournament-batting-group">
+          <label for="tournament-bat-first">Team to Bat First</label>
+          <select id="tournament-bat-first">
+            <option value="0">Team A</option>
+            <option value="1">Team B</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tournament-captainA">Team A Captain</label>
+          <input type="text" id="tournament-captainA" placeholder="Captain name" required>
+        </div>
+        <div class="form-group">
+          <label for="tournament-captainB">Team B Captain</label>
+          <input type="text" id="tournament-captainB" placeholder="Captain name" required>
+        </div>
+        <div class="form-group">
+          <label for="tournament-overs">Total Overs</label>
+          <input type="number" id="tournament-overs" placeholder="e.g. 20" min="1" max="50" required>
+        </div>
+        <div class="form-group">
+          <label for="tournament-players">Players per Team</label>
+          <input type="number" id="tournament-players" placeholder="e.g. 11" min="2" max="11" required>
+        </div>
+        <div id="tournament-player-names-section" class="player-names-section"></div>
+        <div class="form-group" style="margin-top: 15px;">
+          <label for="tournament-host-password">🔐 Host Control Password (required)</label>
+          <input type="password" id="tournament-host-password" placeholder="Choose a password" required>
+        </div>
+        <div class="players-info" id="tournament-players-info"></div>
+        <button type="submit" class="start-btn" id="btn-start-tournament">
+          <span>Start Tournament Match</span>
+          <div class="ripple-container"></div>
+        </button>
+      </form>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+    </div>
+  </section>
+
+  <!-- ==================== LOCAL MATCH SCREEN ==================== -->
+  <section id="screen-local-match" class="screen">
+    <div class="match-container with-pitch">
+      <!-- Pitch Section -->
+      <div class="pitch-container" id="local-pitch-container">
+        <div class="pitch-surface">
+          <div class="pitch-strip">
+            <div class="crease top-crease"></div>
+            <div class="crease bottom-crease"></div>
+            <div class="runner runner-a" id="local-runner-a"></div>
+            <div class="runner runner-b" id="local-runner-b"></div>
+          </div>
+        </div>
+        <div class="pitch-event-overlay" id="local-pitch-event"></div>
+      </div>
+
+      <!-- Bottom Panel -->
+      <div class="match-bottom-panel">
+      <!-- Auth Button (small corner) -->
+      <button class="auth-corner-btn" id="local-auth-banner" title="Authenticate">
+        <span class="auth-corner-icon">🔒</span>
+      </button>
+
+      <!-- Scoreboard -->
+      <div class="scoreboard" id="local-scoreboard">
+        <div class="scoreboard-header">
+          <div class="team-badge batting" id="local-teamA-badge">
+            <span class="team-name" id="local-sb-teamA">Team A</span>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="team-badge" id="local-teamB-badge">
+            <span class="team-name" id="local-sb-teamB">Team B</span>
+          </div>
+        </div>
+
+        <div class="score-display">
+          <div class="current-innings-label" id="local-innings-label">1st Innings</div>
+          <div class="score-main">
+            <span class="score-runs" id="local-runs">0</span>
+            <span class="score-separator">/</span>
+            <span class="score-wickets" id="local-wickets">0</span>
+          </div>
+          <div class="score-overs">
+            Overs: <span id="local-overs-display">0.0</span> / <span id="local-total-overs">0</span>
+          </div>
+        </div>
+
+        <div class="wicket-indicator" id="local-wicket-indicator"></div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Players Left</span>
+            <span class="stat-value" id="local-players-remaining">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Run Rate</span>
+            <span class="stat-value" id="local-run-rate">0.00</span>
+          </div>
+          <div class="stat-item" id="local-target-section" style="display:none">
+            <span class="stat-label">Target</span>
+            <span class="stat-value" id="local-target">0</span>
+          </div>
+          <div class="stat-item" id="local-required-section" style="display:none">
+            <span class="stat-label">Need</span>
+            <span class="stat-value" id="local-required">0 off 0</span>
+          </div>
+          <div class="stat-item" id="local-reqrate-section" style="display:none">
+            <span class="stat-label">Req. Rate</span>
+            <span class="stat-value" id="local-req-rate">0.00</span>
+          </div>
+          <div class="stat-item stat-item-extras">
+            <span class="stat-label">Extras</span>
+            <span class="stat-value" id="local-extras">0</span>
+          </div>
+        </div>
+
+        <div class="last-over-section">
+          <span class="last-over-label">This Over:</span>
+          <div class="last-over-balls" id="local-current-over"></div>
+        </div>
+      </div>
+
+      <!-- Run Controls -->
+      <div class="controls" id="local-controls">
+        <div class="run-buttons">
+          <button class="run-btn" data-action="dot">0</button>
+          <button class="run-btn" data-action="1">1</button>
+          <button class="run-btn" data-action="2">2</button>
+          <button class="run-btn" data-action="3">3</button>
+          <button class="run-btn four" data-action="4">4</button>
+          <button class="run-btn" data-action="5">5</button>
+          <button class="run-btn six" data-action="6">6</button>
+        </div>
+        <div class="extra-buttons">
+          <button class="extra-btn wide" data-action="wide">Wide</button>
+          <button class="extra-btn noball" data-action="noball">No Ball</button>
+          <button class="extra-btn out" data-action="out">OUT</button>
+          <button class="extra-btn undo" data-action="undo">↩ Undo</button>
+        </div>
+        <div class="extra-run-row">
+          <button class="extra-run-btn" data-action="extrarun" id="local-extra-run-btn">+1 Extra</button>
+        </div>
+      </div>
+
+      <!-- Bottom Actions -->
+      <div class="match-actions">
+        <button class="action-btn delete-btn" id="btn-local-delete">🗑️ Delete Match</button>
+        <button class="action-btn" id="btn-local-home">🏠 Home</button>
+      </div>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+      </div> <!-- End Bottom Panel -->
+    </div>
+  </section>
+
+  <!-- ==================== TOURNAMENT MATCH SCREEN ==================== -->
+  <section id="screen-tournament-match" class="screen">
+    <div class="match-container with-pitch">
+      <!-- Pitch Section -->
+      <div class="pitch-container" id="tournament-pitch-container">
+        <div class="pitch-surface">
+          <div class="pitch-strip">
+            <div class="crease top-crease"></div>
+            <div class="crease bottom-crease"></div>
+            <div class="runner runner-a" id="tournament-runner-a"></div>
+            <div class="runner runner-b" id="tournament-runner-b"></div>
+          </div>
+        </div>
+        <div class="pitch-event-overlay" id="tournament-pitch-event"></div>
+      </div>
+
+      <!-- Bottom Panel -->
+      <div class="match-bottom-panel">
+      <!-- Auth Button (small corner) -->
+      <button class="auth-corner-btn" id="tournament-auth-banner" title="Authenticate">
+        <span class="auth-corner-icon">🔒</span>
+      </button>
+
+      <!-- Tournament Header -->
+      <div class="tournament-header" id="tournament-header-info">
+        <div class="tournament-title" id="tournament-display-name">Tournament</div>
+      </div>
+
+      <!-- Scoreboard -->
+      <div class="scoreboard tournament-scoreboard" id="tournament-scoreboard">
+        <div class="scoreboard-header">
+          <div class="team-badge batting" id="tournament-teamA-badge">
+            <span class="team-name" id="tournament-sb-teamA">Team A</span>
+            <span class="captain-name" id="tournament-sb-captainA">Captain</span>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="team-badge" id="tournament-teamB-badge">
+            <span class="team-name" id="tournament-sb-teamB">Team B</span>
+            <span class="captain-name" id="tournament-sb-captainB">Captain</span>
+          </div>
+        </div>
+
+        <div class="score-display">
+          <div class="current-innings-label" id="tournament-innings-label">1st Innings</div>
+          <div class="score-main">
+            <span class="score-runs" id="tournament-runs">0</span>
+            <span class="score-separator">/</span>
+            <span class="score-wickets" id="tournament-wickets">0</span>
+          </div>
+          <div class="score-overs">
+            Overs: <span id="tournament-overs-display">0.0</span> / <span id="tournament-total-overs">0</span>
+          </div>
+        </div>
+
+        <div class="wicket-indicator" id="tournament-wicket-indicator"></div>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Players Left</span>
+            <span class="stat-value" id="tournament-players-remaining">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Run Rate</span>
+            <span class="stat-value" id="tournament-run-rate">0.00</span>
+          </div>
+          <div class="stat-item" id="tournament-target-section" style="display:none">
+            <span class="stat-label">Target</span>
+            <span class="stat-value" id="tournament-target">0</span>
+          </div>
+          <div class="stat-item" id="tournament-required-section" style="display:none">
+            <span class="stat-label">Need</span>
+            <span class="stat-value" id="tournament-required">0 off 0</span>
+          </div>
+          <div class="stat-item" id="tournament-reqrate-section" style="display:none">
+            <span class="stat-label">Req. Rate</span>
+            <span class="stat-value" id="tournament-req-rate">0.00</span>
+          </div>
+          <div class="stat-item stat-item-extras">
+            <span class="stat-label">Extras</span>
+            <span class="stat-value" id="tournament-extras">0</span>
+          </div>
+        </div>
+
+        <div class="last-over-section">
+          <span class="last-over-label">This Over:</span>
+          <div class="last-over-balls" id="tournament-current-over"></div>
+        </div>
+
+        <!-- Player List -->
+        <div class="player-list-section" id="tournament-player-list">
+        </div>
+      </div>
+
+      <!-- Run Controls -->
+      <div class="controls" id="tournament-controls">
+        <div class="run-buttons">
+          <button class="run-btn" data-action="dot">0</button>
+          <button class="run-btn" data-action="1">1</button>
+          <button class="run-btn" data-action="2">2</button>
+          <button class="run-btn" data-action="3">3</button>
+          <button class="run-btn four" data-action="4">4</button>
+          <button class="run-btn" data-action="5">5</button>
+          <button class="run-btn six" data-action="6">6</button>
+        </div>
+        <div class="extra-buttons">
+          <button class="extra-btn wide" data-action="wide">Wide</button>
+          <button class="extra-btn noball" data-action="noball">No Ball</button>
+          <button class="extra-btn out" data-action="out">OUT</button>
+          <button class="extra-btn undo" data-action="undo">↩ Undo</button>
+        </div>
+        <div class="extra-run-row">
+          <button class="extra-run-btn" data-action="extrarun" id="tournament-extra-run-btn">+1 Extra</button>
+        </div>
+      </div>
+
+      <!-- Bottom Actions -->
+      <div class="match-actions">
+        <button class="action-btn delete-btn" id="btn-tournament-delete">🗑️ Delete Match</button>
+        <button class="action-btn" id="btn-tournament-home">🏠 Home</button>
+      </div>
+      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+      </div> <!-- End Bottom Panel -->
+    </div>
+  </section>
+
+  <!-- ==================== MATCH END SCREEN ==================== -->
+  <section id="screen-match-end" class="screen">
+    <div class="match-end-container">
+      <div class="celebration-bg" id="celebration-bg"></div>
+      <div class="winner-card">
+        <div class="trophy-icon">🏆</div>
+        <h2 class="winner-title" id="winner-title">Match Result</h2>
+        <div class="winner-team" id="winner-team-name">Winner</div>
+        <div class="final-scores" id="final-scores"></div>
+        <button class="start-btn" data-navigate="home" id="btn-new-match">
+          <span>New Match</span>
+          <div class="ripple-container"></div>
+        </button>
+        <div class="creator-credit" style="margin-top: 16px;">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== AUTH MODAL ==================== -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <h3>🔐 Host Authentication</h3>
+      <p>Enter host password to control scoring</p>
+      <input type="password" id="auth-code-input" placeholder="Enter password" class="modal-input">
+      <div class="modal-error" id="auth-error"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="auth-cancel">Cancel</button>
+        <button class="modal-btn confirm" id="auth-confirm">Authenticate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DELETE MODAL ==================== -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal">
+      <h3>🗑️ Delete Match</h3>
+      <p>Enter host password to permanently delete this live match</p>
+      <input type="password" id="delete-code-input" placeholder="Enter password" class="modal-input">
+      <div class="modal-error" id="delete-error"></div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" id="delete-cancel">Cancel</button>
+        <button class="modal-btn confirm danger" id="delete-confirm">Delete Match</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== EVENT ANIMATION OVERLAY ==================== -->
+  <div class="animation-overlay" id="animation-overlay">
+    <div class="animation-content" id="animation-content"></div>
+  </div>
+
+  <!-- ==================== CINEMATIC MATCH INTRO ==================== -->
+  <div class="cinematic-intro hidden" id="cinematic-intro">
+    <div class="intro-bg-particles"></div>
+    <div class="intro-content">
+      <div class="intro-match-type" id="intro-match-type">Match Type</div>
+      <div class="intro-teams-container">
+        <div class="intro-team intro-team-a" id="intro-team-a-name">TEAM A</div>
+        <div class="intro-vs" id="intro-vs">VS</div>
+        <div class="intro-team intro-team-b" id="intro-team-b-name">TEAM B</div>
+      </div>
+      <div class="intro-details" id="intro-details">
+        <span id="intro-overs">10 Overs Match</span> &bull; <span id="intro-players">8 Players</span>
+      </div>
+      <div class="intro-sub-details" id="intro-sub-details"></div>
+    </div>
+    <button class="intro-skip-btn" id="intro-skip-btn">Skip ⏭</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/firebase.js"></script>
+  <script src="js/cricket.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/local.js"></script>
+  <script src="js/tournament.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
