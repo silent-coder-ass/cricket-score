@@ -222,13 +222,17 @@ const App = (() => {
         
         if (!matchState) return;
         
-        if (matchState.mode === 'local') {
-          FirebaseSync.updateSessionMatch(sessionId, matchState.teams[0].name + ' vs ' + matchState.teams[1].name);
-          LocalMode.joinLiveMatch(matchState);
-        } else if (matchState.mode === 'tournament') {
-          FirebaseSync.updateSessionMatch(sessionId, matchState.teams[0].name + ' vs ' + matchState.teams[1].name);
-          TournamentMode.joinLiveMatch(matchState);
-        }
+        const joinMatch = () => {
+          if (matchState.mode === 'local') {
+            FirebaseSync.updateSessionMatch(sessionId, matchState.teams[0].name + ' vs ' + matchState.teams[1].name);
+            LocalMode.joinLiveMatch(matchState);
+          } else if (matchState.mode === 'tournament') {
+            FirebaseSync.updateSessionMatch(sessionId, matchState.teams[0].name + ' vs ' + matchState.teams[1].name);
+            TournamentMode.joinLiveMatch(matchState);
+          }
+        };
+
+        showCinematicIntro(matchState, joinMatch);
       });
     }
 
@@ -379,8 +383,59 @@ const App = (() => {
     document.getElementById(id).classList.remove('active');
   }
 
+  /**
+   * Show cinematic match intro overlay
+   */
+  function showCinematicIntro(matchState, onComplete) {
+    const intro = document.getElementById('cinematic-intro');
+    if (!intro) {
+      if (onComplete) onComplete();
+      return;
+    }
+
+    // Populate data
+    const teamA = matchState.teams?.[0]?.name || 'Team A';
+    const teamB = matchState.teams?.[1]?.name || 'Team B';
+    document.getElementById('intro-match-type').textContent = matchState.mode === 'tournament' ? 'Tournament Match' : 'Local Match';
+    document.getElementById('intro-team-a-name').textContent = teamA;
+    document.getElementById('intro-team-b-name').textContent = teamB;
+    
+    // Attempt to get overs/players from settings (each mode may store them slightly differently)
+    const overs = matchState.settings?.totalOvers || matchState.settings?.overs || '10';
+    const players = matchState.playersPerTeam || matchState.settings?.players || '11';
+    
+    document.getElementById('intro-overs').textContent = `${overs} Overs Match`;
+    document.getElementById('intro-players').textContent = `${players} Players`;
+    
+    const subDetails = document.getElementById('intro-sub-details');
+    if (matchState.mode === 'tournament' && matchState.tournamentName) {
+      subDetails.textContent = matchState.tournamentName;
+    } else {
+      subDetails.textContent = 'Live Broadcast';
+    }
+
+    // Show intro
+    intro.classList.remove('hidden');
+
+    let timeoutId;
+    
+    // Complete function
+    const finishIntro = () => {
+      clearTimeout(timeoutId);
+      intro.classList.add('hidden');
+      document.getElementById('intro-skip-btn').removeEventListener('click', finishIntro);
+      if (onComplete) onComplete();
+    };
+
+    // Auto complete after 3.8s (sync with CSS animations)
+    timeoutId = setTimeout(finishIntro, 3800);
+
+    // Skip button
+    document.getElementById('intro-skip-btn').addEventListener('click', finishIntro);
+  }
+
   // Init on DOM ready
   document.addEventListener('DOMContentLoaded', init);
 
-  return { navigate };
+  return { navigate, showCinematicIntro };
 })();
