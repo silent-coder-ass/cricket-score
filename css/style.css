@@ -2143,7 +2143,7 @@ input, button {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom center;
-  transition: top 1s ease-in-out, bottom 1s ease-in-out;
+  transition: top 1s ease-in-out;
   z-index: 5;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
 }
@@ -2165,7 +2165,7 @@ input, button {
 
 .runner-b {
   background-color: var(--red); /* Red */
-  bottom: 5%; /* Batter end default */
+  top: 78%; /* Batter end default */
 }
 
 /* Running state animation class */
