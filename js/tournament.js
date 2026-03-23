@@ -114,7 +114,10 @@ const TournamentMode = (() => {
       playersA, playersB,
       tournamentName,
       batFirst: batFirst,
-      hostPassword: hostPassword
+      hostPassword: hostPassword,
+      // Tournament always counts Wide & NoBall runs (+1 each, no pending mode)
+      wideRunEnabled: true,
+      noBallRunEnabled: true
     });
 
     // Upload instantly to Firebase so viewers see it on the Home Screen immediately
@@ -241,9 +244,10 @@ const TournamentMode = (() => {
       case '4':    CricketEngine.addRuns(matchState, 4); animType = 'four'; break;
       case '5':    CricketEngine.addRuns(matchState, 5); break;
       case '6':    CricketEngine.addRuns(matchState, 6); animType = 'six'; break;
-      case 'wide': CricketEngine.addWide(matchState); animType = 'wide'; break;
-      case 'noball': CricketEngine.addNoBall(matchState); animType = 'noball'; break;
+      case 'wide': CricketEngine.addWide(matchState, 0); animType = 'wide'; break;
+      case 'noball': CricketEngine.addNoBall(matchState, 0); animType = 'noball'; break;
       case 'out':  CricketEngine.addWicket(matchState); animType = 'out'; break;
+      case 'extrarun': CricketEngine.addExtraRun(matchState); break;
       case 'undo': 
         if (CricketEngine.undo(matchState)) {
           // Trigger basic animation reflow to indicate an update happened
@@ -330,6 +334,14 @@ const TournamentMode = (() => {
 
     // Current over
     updateCurrentOver('tournament-current-over', team.currentOver);
+
+    // Extras
+    const extrasEl = el('tournament-extras');
+    if (extrasEl) extrasEl.textContent = matchState.extras || 0;
+
+    // Show/hide extra run button (only for authenticated scorer)
+    const extraRunBtn = el('tournament-extra-run-btn');
+    if (extraRunBtn) extraRunBtn.style.display = isAuthenticated ? 'block' : 'none';
   }
 
   function updateWicketIndicator(id, wickets, max) {

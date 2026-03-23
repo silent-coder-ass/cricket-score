@@ -6,6 +6,7 @@ const LocalMode = (() => {
   let matchState = null;
   let isAuthenticated = false;
   let matchListener = null;
+  let pendingExtraMode = null; // { type: 'wide' | 'noball' } when toggle ON and waiting for run tap
 
   // DOM references (lazy)
   const el = (id) => document.getElementById(id);
@@ -62,13 +63,18 @@ const LocalMode = (() => {
     const batFirst = parseInt(el('local-bat-first').value) || 0;
     const hostPassword = el('local-host-password').value.trim();
 
+    const noBallRunEnabled = el('toggle-noball-run') ? el('toggle-noball-run').checked : false;
+    const wideRunEnabled = el('toggle-wide-run') ? el('toggle-wide-run').checked : false;
+
     matchState = CricketEngine.createMatch({
       mode: 'local',
       teamA, teamB,
       totalOvers: overs,
       playersPerTeam: players,
       batFirst: batFirst,
-      hostPassword: hostPassword
+      hostPassword: hostPassword,
+      noBallRunEnabled: noBallRunEnabled,
+      wideRunEnabled: wideRunEnabled
     });
 
     // Upload instantly to Firebase so viewers see it on the Home Screen immediately
@@ -184,6 +190,39 @@ const LocalMode = (() => {
 
     let animType = null;
 
+    // If we're in pending extra mode, the next tap of a run button resolves it
+    if (pendingExtraMode && ['dot','1','2','3','4','5','6'].includes(action)) {
+      const runs = action === 'dot' ? 0 : parseInt(action);
+      if (pendingExtraMode.type === 'wide') {
+        CricketEngine.addWide(matchState, runs);
+        animType = 'wide';
+      } else {
+        CricketEngine.addNoBall(matchState, runs);
+        animType = 'noball';
+      }
+      pendingExtraMode = null;
+      _clearPendingUI();
+
+      if (animType) Animations.show(animType);
+      _animateScore();
+      updateScoreboard();
+      if (isAuthenticated) {
+        if (animType) matchState.lastEvent = { type: animType, timestamp: Date.now() };
+        FirebaseSync.syncState(matchState);
+      }
+      if (matchState.isMatchOver) setTimeout(() => showMatchEnd(), 1200);
+      return;
+    }
+
+    // If a wide/noball arrived while already pending, commit the base first, then re-enter
+    if (pendingExtraMode && (action === 'wide' || action === 'noball')) {
+      // Commit pending with 0 bonus runs (engine handles full +1 add since toggle is ON here)
+      if (pendingExtraMode.type === 'wide') CricketEngine.addWide(matchState, 0);
+      else CricketEngine.addNoBall(matchState, 0);
+      pendingExtraMode = null;
+      _clearPendingUI();
+    }
+
     switch (action) {
       case 'dot':
         CricketEngine.addRuns(matchState, 0);
@@ -209,25 +248,48 @@ const LocalMode = (() => {
         animType = 'six';
         break;
       case 'wide':
-        CricketEngine.addWide(matchState);
-        animType = 'wide';
-        break;
+        if (matchState.wideRunEnabled) {
+          // Toggle ON: auto +1 run immediately, no pending mode, no extra run prompt
+          CricketEngine.addWide(matchState, 0);
+          animType = 'wide';
+          break;
+        }
+        // Toggle OFF: animation only, zero score change
+        Animations.show('wide');
+        return;
       case 'noball':
-        CricketEngine.addNoBall(matchState);
-        animType = 'noball';
-        break;
+        if (matchState.noBallRunEnabled) {
+          // Toggle ON: enter pending mode — wait for run button tap for extra runs
+          pendingExtraMode = { type: 'noball' };
+          _showPendingUI('noball');
+          return; // Don't fire yet
+        }
+        // Toggle OFF: animation only, zero score change
+        Animations.show('noball');
+        return;
       case 'out':
+        // If pending, cancel pending first
+        if (pendingExtraMode) {
+          if (pendingExtraMode.type === 'wide') CricketEngine.addWide(matchState, 0);
+          else CricketEngine.addNoBall(matchState, 0);
+          pendingExtraMode = null;
+          _clearPendingUI();
+        }
         CricketEngine.addWicket(matchState);
         animType = 'out';
         break;
+      case 'extrarun':
+        CricketEngine.addExtraRun(matchState);
+        animType = null;
+        break;
       case 'undo':
+        pendingExtraMode = null;
+        _clearPendingUI();
         if (CricketEngine.undo(matchState)) {
-          // Instead of passing animation, we just update without popping bubbles for undo
-          // But a small visual queue helps
           const runsEl = el('local-runs');
           if (runsEl) {
             runsEl.classList.remove('animate');
-            void runsEl.offsetWidth; // trigger reflow
+            void runsEl.offsetWidth;
             runsEl.classList.add('animate');
           }
         }
@@ -241,14 +303,7 @@ const LocalMode = (() => {
       Animations.show(animType);
     }
 
-    // Animate score number
-    const runsEl = el('local-runs');
-    if (runsEl) {
-      runsEl.classList.remove('animate');
-      void runsEl.offsetWidth; // trigger reflow
-      runsEl.classList.add('animate');
-    }
-
+    _animateScore();
     updateScoreboard();
 
     // Sync to Firebase if authenticated
@@ -263,6 +318,39 @@ const LocalMode = (() => {
     if (matchState.isMatchOver) {
       setTimeout(() => showMatchEnd(), 1200);
     }
+  }
+
+  function _animateScore() {
+    const runsEl = el('local-runs');
+    if (runsEl) {
+      runsEl.classList.remove('animate');
+      void runsEl.offsetWidth;
+      runsEl.classList.add('animate');
+    }
+  }
+
+  function _showPendingUI(type) {
+    const label = type === 'wide' ? 'Wide' : 'No Ball';
+    const controls = el('local-controls');
+    if (!controls) return;
+    let hint = controls.querySelector('.pending-hint');
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.className = 'pending-hint';
+      controls.insertBefore(hint, controls.firstChild);
+    }
+    hint.textContent = `${label} — Tap a run button to add extra runs`;
+    hint.style.display = 'block';
+    // Highlight run buttons
+    controls.querySelectorAll('.run-btn').forEach(btn => btn.classList.add('pending-highlight'));
+  }
+
+  function _clearPendingUI() {
+    const controls = el('local-controls');
+    if (!controls) return;
+    const hint = controls.querySelector('.pending-hint');
+    if (hint) hint.style.display = 'none';
+    controls.querySelectorAll('.run-btn').forEach(btn => btn.classList.remove('pending-highlight'));
   }
 
   /**
@@ -319,6 +407,14 @@ const LocalMode = (() => {
 
     // Current over balls
     updateCurrentOver('local-current-over', team.currentOver);
+
+    // Extras
+    const extrasEl = el('local-extras');
+    if (extrasEl) extrasEl.textContent = matchState.extras || 0;
+
+    // Show/hide extra run button (only for authenticated scorer)
+    const extraRunBtn = el('local-extra-run-btn');
+    if (extraRunBtn) extraRunBtn.style.display = isAuthenticated ? 'block' : 'none';
   }
 
   /**

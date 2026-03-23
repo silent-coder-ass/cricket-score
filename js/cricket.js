@@ -44,6 +44,11 @@ const CricketEngine = (() => {
       winner: null,
       winMessage: '',
       target: null,
+      // Extra run tracking
+      extras: 0,
+      // Toggle flags (set from setup screen)
+      noBallRunEnabled: config.noBallRunEnabled || false,
+      wideRunEnabled: config.wideRunEnabled || false,
       teams: [
         {
           name: teamAConfig.name,
@@ -70,8 +75,6 @@ const CricketEngine = (() => {
           overSummaries: []
         }
       ],
-      // Tournament extras
-      tournamentName: config.tournamentName || '',
       // Security
       hostPassword: config.hostPassword || ''
     };
@@ -150,29 +153,58 @@ const CricketEngine = (() => {
   }
 
   /**
-   * Add wide — +1 run, ball NOT counted
+   * Add wide — behaviour controlled by wideRunEnabled toggle:
+   *   ON  → +1 base run + extraRuns (from pending mode), ball NOT counted
+   *   OFF → 0 runs, no state change (animation only via caller)
    */
-  function addWide(state) {
+  function addWide(state, extraRuns) {
     if (state.isMatchOver) return state;
+    // Toggle OFF: no score, no history — animation handled by caller
+    if (!state.wideRunEnabled) return state;
+
     pushHistory(state);
     const team = getBattingTeam(state);
-    team.runs += 1;
-    team.currentOver.push({ label: 'WD', class: 'wide' });
-    team.ballHistory.push({ label: 'WD', class: 'wide', type: 'wide', value: 1 });
+    const bonusRuns = extraRuns || 0;
+    const totalRuns = 1 + bonusRuns;
+    team.runs += totalRuns;
+    const label = bonusRuns > 0 ? `WD+${bonusRuns}` : 'WD';
+    team.currentOver.push({ label, class: 'wide' });
+    team.ballHistory.push({ label, class: 'wide', type: 'wide', value: totalRuns });
     checkChaseComplete(state);
     return state;
   }
 
   /**
-   * Add no ball — +1 run, ball NOT counted
+   * Add no ball — behaviour controlled by noBallRunEnabled toggle:
+   *   ON  → +1 base run + extraRuns (from pending mode), ball NOT counted
+   *   OFF → 0 runs, no state change (animation only via caller)
    */
-  function addNoBall(state) {
+  function addNoBall(state, extraRuns) {
+    if (state.isMatchOver) return state;
+    // Toggle OFF: no score, no history — animation handled by caller
+    if (!state.noBallRunEnabled) return state;
+
+    pushHistory(state);
+    const team = getBattingTeam(state);
+    const bonusRuns = extraRuns || 0;
+    const totalRuns = 1 + bonusRuns;
+    team.runs += totalRuns;
+    const label = bonusRuns > 0 ? `NB+${bonusRuns}` : 'NB';
+    team.currentOver.push({ label, class: 'noball' });
+    team.ballHistory.push({ label, class: 'noball', type: 'noball', value: totalRuns });
+    checkChaseComplete(state);
+    return state;
+  }
+
+  /**
+   * Add +1 extra run — NOT a ball, does NOT affect over/striker
+   */
+  function addExtraRun(state) {
     if (state.isMatchOver) return state;
     pushHistory(state);
     const team = getBattingTeam(state);
     team.runs += 1;
-    team.currentOver.push({ label: 'NB', class: 'noball' });
-    team.ballHistory.push({ label: 'NB', class: 'noball', type: 'noball', value: 1 });
+    state.extras = (state.extras || 0) + 1;
     checkChaseComplete(state);
     return state;
   }
@@ -344,6 +376,7 @@ const CricketEngine = (() => {
     addWide,
     addNoBall,
     addWicket,
+    addExtraRun,
     getRunRate,
     getRequiredRate,
     getRemainingBalls,

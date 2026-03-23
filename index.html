@@ -56,81 +56,95 @@
 
   <!-- ==================== LOCAL SETUP SCREEN ==================== -->
   <section id="screen-local-setup" class="screen">
-    <div class="setup-container local-setup-premium">
-      <button class="back-btn" data-navigate="home">← Back</button>
-      
-      <!-- Premium Header -->
-      <div class="setup-header-card">
-        <div class="setup-header-icon">🏏</div>
-        <h2 class="setup-title-premium">Local Match<br><span>Setup</span></h2>
-        <p class="setup-subtitle">Configure your match and start scoring</p>
+    <div class="lsetup-wrapper">
+
+      <!-- Compact Header -->
+      <div class="lsetup-header">
+        <button class="back-btn lsetup-back" data-navigate="home">← Back</button>
+        <div class="lsetup-title-row">
+          <span class="lsetup-icon">🏏</span>
+          <div>
+            <h2 class="lsetup-title">Local Match</h2>
+            <p class="lsetup-sub">Configure and start scoring</p>
+          </div>
+        </div>
       </div>
 
-      <form id="local-setup-form" class="setup-form">
-        <!-- Teams Card -->
-        <div class="setup-card teams-card">
-          <div class="setup-card-header">
-            <span class="setup-card-icon">⚔️</span>
-            <span class="setup-card-label">Teams</span>
+      <!-- Glass Setup Card -->
+      <form id="local-setup-form" class="lsetup-card">
+
+        <!-- Row 1: Teams -->
+        <div class="lsetup-grid-2">
+          <div class="lsetup-field">
+            <label class="lsetup-label">🔵 Team A</label>
+            <input type="text" id="local-teamA" class="lsetup-input" placeholder="Team A">
           </div>
-          <div class="teams-row">
-            <div class="form-group team-input-group">
-              <label for="local-teamA">🔵 Team A</label>
-              <input type="text" id="local-teamA" placeholder="e.g. India">
-            </div>
-            <div class="teams-vs-badge">VS</div>
-            <div class="form-group team-input-group">
-              <label for="local-teamB">🔴 Team B</label>
-              <input type="text" id="local-teamB" placeholder="e.g. Australia">
-            </div>
+          <div class="lsetup-field">
+            <label class="lsetup-label">🔴 Team B</label>
+            <input type="text" id="local-teamB" class="lsetup-input" placeholder="Team B">
           </div>
         </div>
 
-        <!-- Batting First Card -->
-        <div class="setup-card">
-          <div class="setup-card-header">
-            <span class="setup-card-icon">🏏</span>
-            <span class="setup-card-label">Batting First</span>
+        <!-- Row 2: Overs + Players -->
+        <div class="lsetup-grid-2">
+          <div class="lsetup-field">
+            <label class="lsetup-label">🎯 Overs</label>
+            <input type="number" id="local-overs" class="lsetup-input" placeholder="10" min="1" max="50" required>
           </div>
-          <div class="form-group" id="local-batting-group">
-            <select id="local-bat-first" class="premium-select">
+          <div class="lsetup-field">
+            <label class="lsetup-label">👥 Players</label>
+            <input type="number" id="local-players" class="lsetup-input" placeholder="8" min="2" max="11" required>
+          </div>
+        </div>
+        <div class="players-info lsetup-players-info" id="local-players-info"></div>
+
+        <!-- Row 3: Batting First + Password -->
+        <div class="lsetup-grid-2">
+          <div class="lsetup-field" id="local-batting-group">
+            <label class="lsetup-label">🏏 Bat First</label>
+            <select id="local-bat-first" class="lsetup-input lsetup-select">
               <option value="0">Team A</option>
               <option value="1">Team B</option>
             </select>
           </div>
+          <div class="lsetup-field">
+            <label class="lsetup-label">🔐 Password</label>
+            <input type="password" id="local-host-password" class="lsetup-input" placeholder="Host secret" required>
+          </div>
         </div>
 
-        <!-- Match Config Card -->
-        <div class="setup-card">
-          <div class="setup-card-header">
-            <span class="setup-card-icon">⚙️</span>
-            <span class="setup-card-label">Match Configuration</span>
+        <!-- Row 4: Toggles (inline) -->
+        <div class="lsetup-toggles">
+          <div class="lsetup-toggle-item">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-noball-run">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="lsetup-toggle-label">No Ball Runs</span>
           </div>
-          <div class="config-row">
-            <div class="form-group config-input">
-              <label for="local-overs">🎯 Overs</label>
-              <input type="number" id="local-overs" placeholder="e.g. 10" min="1" max="50" required>
-            </div>
-            <div class="form-group config-input">
-              <label for="local-players">👥 Players</label>
-              <input type="number" id="local-players" placeholder="e.g. 8" min="2" max="11" required>
-            </div>
+          <div class="lsetup-toggle-sep"></div>
+          <div class="lsetup-toggle-item">
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-wide-run">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="lsetup-toggle-label">Wide Runs</span>
           </div>
-          <div class="form-group" style="margin-top: 15px;">
-            <label for="local-host-password">🔐 Host Control Password (required)</label>
-            <input type="password" id="local-host-password" placeholder="Choose a password" required>
-          </div>
-          <div class="players-info" id="local-players-info"></div>
         </div>
 
-        <button type="submit" class="start-btn glow-btn" id="btn-start-local">
-          <span>🚀 Start Match</span>
-          <div class="ripple-container"></div>
-        </button>
       </form>
-      <div class="creator-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+
+      <!-- Fixed-bottom Start Button -->
+      <div class="lsetup-footer">
+        <button type="submit" form="local-setup-form" class="lsetup-start-btn" id="btn-start-local">
+          🚀 Start Match
+        </button>
+        <div class="creator-credit lsetup-credit">Made ❤️ by <strong>SANUWAR HUSSAIN</strong><a href="https://www.instagram.com/iam.sanuwar?igsh=Z2kyODk1YmppY3pj&utm_source=qr" target="_blank" class="insta-follow-btn"><svg class="insta-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Follow on Instagram</a></div>
+      </div>
+
     </div>
   </section>
+
 
   <!-- ==================== TOURNAMENT SETUP SCREEN ==================== -->
   <section id="screen-tournament-setup" class="screen">
@@ -243,6 +257,10 @@
             <span class="stat-label">Req. Rate</span>
             <span class="stat-value" id="local-req-rate">0.00</span>
           </div>
+          <div class="stat-item stat-item-extras">
+            <span class="stat-label">Extras</span>
+            <span class="stat-value" id="local-extras">0</span>
+          </div>
         </div>
 
         <div class="last-over-section">
@@ -267,6 +285,9 @@
           <button class="extra-btn noball" data-action="noball">No Ball</button>
           <button class="extra-btn out" data-action="out">OUT</button>
           <button class="extra-btn undo" data-action="undo">↩ Undo</button>
+        </div>
+        <div class="extra-run-row">
+          <button class="extra-run-btn" data-action="extrarun" id="local-extra-run-btn">+1 Extra</button>
         </div>
       </div>
 
@@ -341,6 +362,10 @@
             <span class="stat-label">Req. Rate</span>
             <span class="stat-value" id="tournament-req-rate">0.00</span>
           </div>
+          <div class="stat-item stat-item-extras">
+            <span class="stat-label">Extras</span>
+            <span class="stat-value" id="tournament-extras">0</span>
+          </div>
         </div>
 
         <div class="last-over-section">
@@ -369,6 +394,9 @@
           <button class="extra-btn noball" data-action="noball">No Ball</button>
           <button class="extra-btn out" data-action="out">OUT</button>
           <button class="extra-btn undo" data-action="undo">↩ Undo</button>
+        </div>
+        <div class="extra-run-row">
+          <button class="extra-run-btn" data-action="extrarun" id="tournament-extra-run-btn">+1 Extra</button>
         </div>
       </div>
 

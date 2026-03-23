@@ -597,6 +597,234 @@ input, button {
 }
 
 /* ================================================
+   LOCAL SETUP — COMPACT SINGLE-SCREEN LAYOUT
+   ================================================ */
+
+/* Remove outer .screen padding so wrapper owns the layout */
+#screen-local-setup {
+  padding: 0;
+}
+
+/* Full-height wrapper — no scroll */
+.lsetup-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 12px 16px 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Compact header */
+.lsetup-header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.lsetup-back {
+  padding: 4px 0;
+  font-size: 0.88rem;
+}
+
+.lsetup-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lsetup-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.lsetup-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+}
+
+.lsetup-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+/* Glass Card (the form itself) */
+.lsetup-card {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* 2-column grid for compact inputs */
+.lsetup-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.lsetup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lsetup-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* Compact input / select */
+.lsetup-input {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.lsetup-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.12);
+}
+
+.lsetup-input::placeholder {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.lsetup-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2364748b' d='M5 7L1 2h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+
+/* Wicket count hint */
+.lsetup-players-info {
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 500;
+  min-height: 0;
+  margin-top: -4px;
+}
+
+/* Inline toggle row */
+.lsetup-toggles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 2px;
+}
+
+.lsetup-toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+}
+
+.lsetup-toggle-sep {
+  width: 1px;
+  height: 28px;
+  background: var(--border-color);
+  margin: 0 12px;
+  flex-shrink: 0;
+}
+
+.lsetup-toggle-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Footer with Start button */
+.lsetup-footer {
+  flex-shrink: 0;
+  padding: 10px 0 8px;
+}
+
+.lsetup-start-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, var(--accent), #0284c7);
+  color: #000;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.35);
+}
+
+.lsetup-start-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 10px rgba(0, 229, 255, 0.2);
+}
+
+/* Subtle pulse glow on start button */
+.lsetup-start-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.45);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: glowPulseOptimized 2s ease-in-out infinite;
+}
+
+/* Creator credit compact */
+.lsetup-credit {
+  padding: 6px 0 4px;
+  font-size: 0.68rem;
+}
+
+
+/* ================================================
    MATCH SCREEN — SCOREBOARD
    ================================================ */
 .match-container {
@@ -1081,6 +1309,178 @@ input, button {
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: var(--red);
+}
+
+/* ================================================
+   TOGGLE SWITCH — Run Options
+   ================================================ */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.toggle-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.toggle-row:first-of-type {
+  padding-top: 0;
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.toggle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.toggle-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow), 0 0 4px rgba(0, 229, 255, 0.5);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ================================================
+   EXTRAS STAT — Emphasis
+   ================================================ */
+.stat-item-extras .stat-label {
+  color: var(--orange);
+}
+
+.stat-item-extras .stat-value {
+  color: var(--orange);
+}
+
+/* ================================================
+   EXTRA RUN BUTTON (+1 Extra)
+   ================================================ */
+.extra-run-row {
+  display: flex;
+  justify-content: center;
+}
+
+.extra-run-btn {
+  position: relative;
+  padding: 13px 36px;
+  border-radius: 50px;
+  background: rgba(249, 115, 22, 0.15);
+  border: 1.5px solid rgba(249, 115, 22, 0.5);
+  color: var(--orange);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.extra-run-btn:active {
+  transform: scale(0.93);
+  background: rgba(249, 115, 22, 0.28);
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.5);
+}
+
+.extra-run-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 14px rgba(249, 115, 22, 0.3);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: extraBtnGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes extraBtnGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* ================================================
+   PENDING EXTRA MODE — hint + run button highlight
+   ================================================ */
+.pending-hint {
+  background: rgba(250, 204, 21, 0.12);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--yellow);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px 14px;
+  letter-spacing: 0.3px;
+  animation: fadeSlideIn 0.25s ease;
+}
+
+.run-btn.pending-highlight {
+  border-color: rgba(250, 204, 21, 0.6);
+  background: rgba(250, 204, 21, 0.08);
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.25);
+  color: var(--yellow);
 }
 
 /* ================================================
