@@ -317,6 +317,11 @@ const LocalMode = (() => {
         matchState.lastEvent = { type: animType, timestamp: Date.now() };
       }
       FirebaseSync.syncState(matchState);
+
+      if (matchState.isMatchOver && !matchState.historySaved) {
+        matchState.historySaved = true;
+        FirebaseSync.saveMatchHistory(matchState);
+      }
     }
 
     // Check match over

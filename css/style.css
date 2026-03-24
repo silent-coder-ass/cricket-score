@@ -825,6 +825,143 @@ input, button {
 
 
 /* ================================================
+   MAIN MENU & HISTORY
+   ================================================ */
+.home-top-menu {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+}
+
+.menu-btn {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.menu-btn:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  min-width: 160px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform-origin: top right;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.menu-dropdown.hidden {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* History List */
+.history-sub {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-bottom: 20px;
+}
+
+.history-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeSlideIn 0.3s ease;
+  position: relative;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.history-teams {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.history-score {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.history-winner {
+  color: var(--yellow);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.history-empty, .history-loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 0;
+  font-size: 0.95rem;
+}
+
+/* ================================================
    MATCH SCREEN — SCOREBOARD
    ================================================ */
 .match-container {
@@ -2089,9 +2226,9 @@ input, button {
   flex-direction: column;
 }
 
-/* 60% Top Section: Pitch */
+/* ~32% Top Section: Pitch (No Scroll) */
 .pitch-container {
-  flex: 0 0 45%;
+  flex: 0 0 32%;
   position: relative;
   background: linear-gradient(to bottom, #102e17, #1c4b26 40%, #225e30);
   border-bottom: 2px solid var(--border-color);
@@ -2106,7 +2243,7 @@ input, button {
 .pitch-surface {
   position: relative;
   width: 90%;
-  height: 130px;
+  height: clamp(80px, 12vh, 120px);
   background: #dbcca1; /* Pitch dirt color */
   border-radius: 4px;
   border-top: 2px solid rgba(255,255,255,0.4);

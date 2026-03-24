@@ -65,6 +65,7 @@ const AdminPanel = (() => {
       btn.addEventListener('click', () => handleControlAction(btn.dataset.ctrl));
     });
 
+    document.getElementById('btn-update-limits').addEventListener('click', handleUpdateLimits);
     document.getElementById('ctrl-reset').addEventListener('click', handleResetMatch);
     document.getElementById('ctrl-end').addEventListener('click', handleEndMatch);
 
@@ -316,6 +317,13 @@ const AdminPanel = (() => {
     document.getElementById('control-team-b').textContent = m.teams[1].name;
     document.getElementById('control-score').textContent = `${team.runs || 0}/${team.wickets || 0}`;
     document.getElementById('control-overs').textContent = `(${overs} ov)`;
+
+    if (document.activeElement.id !== 'ctrl-edit-overs') {
+      document.getElementById('ctrl-edit-overs').value = m.totalOvers || 5;
+    }
+    if (document.activeElement.id !== 'ctrl-edit-players') {
+      document.getElementById('ctrl-edit-players').value = m.playersPerTeam || 11;
+    }
   }
 
   function closeControlModal() {
@@ -422,6 +430,25 @@ const AdminPanel = (() => {
     if (!confirm('Are you sure you want to DELETE this match?')) return;
     db.ref('matches/current/' + controlMatchId).remove();
     closeControlModal();
+  }
+
+  function handleUpdateLimits() {
+    if (!controlMatchState || !controlMatchId) return;
+    const newOvers = parseInt(document.getElementById('ctrl-edit-overs').value);
+    const newPlayers = parseInt(document.getElementById('ctrl-edit-players').value);
+    
+    if (newOvers >= 1) controlMatchState.totalOvers = newOvers;
+    if (newPlayers >= 2) {
+      controlMatchState.playersPerTeam = newPlayers;
+      controlMatchState.maxWickets = newPlayers - 1;
+    }
+    
+    syncControlMatch(controlMatchState);
+    
+    const btn = document.getElementById('btn-update-limits');
+    const oldText = btn.textContent;
+    btn.textContent = 'Updated!';
+    setTimeout(() => { btn.textContent = oldText; }, 1500);
   }
 
   function handleEndMatch() {

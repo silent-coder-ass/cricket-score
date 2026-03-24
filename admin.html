@@ -164,6 +164,19 @@
           <span id="control-score">0/0</span>
           <span id="control-overs">(0.0 ov)</span>
         </div>
+        
+        <div class="control-live-edit" style="display:flex; gap:12px; margin-bottom:16px; background:rgba(255,255,255,0.05); padding:12px; border-radius:8px;">
+           <div class="input-group" style="margin-bottom:0; flex:1;">
+             <label style="font-size:0.75rem;">Limit Overs</label>
+             <input type="number" id="ctrl-edit-overs" min="1" max="50" style="padding:6px; font-size:0.9rem;">
+           </div>
+           <div class="input-group" style="margin-bottom:0; flex:1;">
+             <label style="font-size:0.75rem;">Max Players</label>
+             <input type="number" id="ctrl-edit-players" min="2" max="11" style="padding:6px; font-size:0.9rem;">
+           </div>
+           <button id="btn-update-limits" class="action-btn" style="align-self:flex-end; padding:6px 12px; font-size:0.85rem; height:fit-content; margin-bottom:2px;">Update</button>
+        </div>
+
         <div class="control-buttons">
           <button class="ctrl-btn run-btn" data-ctrl="0">Dot</button>
           <button class="ctrl-btn run-btn" data-ctrl="1">+1</button>

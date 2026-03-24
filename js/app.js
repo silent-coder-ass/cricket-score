@@ -32,8 +32,66 @@ const App = (() => {
       currentMode = null;
     }
 
+    // Custom Triggers
+    if (screenId === 'history') {
+      loadHistory();
+    }
+
     // Scroll to top
     window.scrollTo(0, 0);
+  }
+
+  /**
+   * Load History Data
+   */
+  function loadHistory() {
+    const list = document.getElementById('history-list');
+    list.innerHTML = '<div class="history-loading">Loading history...</div>';
+
+    firebase.database().ref('score/history').orderByChild('date').once('value')
+      .then(snapshot => {
+        if (!snapshot.exists()) {
+          list.innerHTML = '<div class="history-empty">No matches found.</div>';
+          return;
+        }
+
+        let html = '';
+        const matches = [];
+        snapshot.forEach(child => {
+          matches.push({ id: child.key, ...child.val() });
+        });
+        
+        // Reverse array to show newest first
+        matches.reverse();
+
+        matches.forEach(m => {
+          const date = new Date(m.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+          html += `
+            <div class="history-card" data-id="${m.id}">
+              <div class="history-header">
+                <span>${date}</span>
+                <span>${m.overs || 0} Overs</span>
+              </div>
+              <div class="history-teams">
+                <span>${m.teamA}</span>
+                <span style="font-size:0.8rem;color:var(--text-muted);font-weight:400;">vs</span>
+                <span>${m.teamB}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                <span class="history-score">${m.runsA}/${m.wicketsA}</span>
+                <span class="history-score">${m.runsB}/${m.wicketsB}</span>
+              </div>
+              <div class="history-winner">Winner: ${m.winner}</div>
+            </div>
+          `;
+        });
+
+        list.innerHTML = html;
+      })
+      .catch(err => {
+        console.error("History err:", err);
+        list.innerHTML = '<div class="history-empty " style="color:var(--red);">Failed to load history</div>';
+      });
   }
 
   /**
@@ -239,6 +297,24 @@ const App = (() => {
     // Init mode setups
     LocalMode.initSetup();
     TournamentMode.initSetup();
+
+    // ---- Home Main Menu ----
+    const homeMenuBtn = document.getElementById('btn-home-menu');
+    const homeDropdown = document.getElementById('home-dropdown');
+    if (homeMenuBtn && homeDropdown) {
+      homeMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        homeDropdown.classList.toggle('hidden');
+      });
+      document.addEventListener('click', () => {
+        if (!homeDropdown.classList.contains('hidden')) {
+          homeDropdown.classList.add('hidden');
+        }
+      });
+      document.getElementById('btn-go-history').addEventListener('click', () => {
+        navigate('history');
+      });
+    }
 
     // ---- Navigation buttons ----
     document.querySelectorAll('[data-navigate]').forEach(btn => {

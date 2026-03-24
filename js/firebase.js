@@ -59,6 +59,32 @@ const FirebaseSync = (() => {
   }
 
   /**
+   * Push completed match to history
+   */
+  function saveMatchHistory(state) {
+    if (!db || !state) return;
+    try {
+      const historyData = {
+        teamA: state.teams[0]?.name || 'Team A',
+        teamB: state.teams[1]?.name || 'Team B',
+        runsA: state.teams[0]?.runs || 0,
+        wicketsA: state.teams[0]?.wickets || 0,
+        runsB: state.teams[1]?.runs || 0,
+        wicketsB: state.teams[1]?.wickets || 0,
+        overs: state.totalOvers || 5,
+        winner: state.winner || 'Unknown',
+        date: Date.now()
+      };
+      db.ref('score/history').push(historyData);
+      
+      // We can also let the live match slowly expire naturally 
+      // instead of deleting it instantly so viewers see the end screen.
+    } catch (e) {
+      console.warn('History save failed:', e);
+    }
+  }
+
+  /**
    * Listen for real-time updates (allows multiple listeners)
    */
   function listenMatch(matchId, callback) {
@@ -183,6 +209,7 @@ const FirebaseSync = (() => {
     listenMatch, removeMatchCallback, stopListeningMatch, 
     listenAllMatches, stopListeningAll,
     resetMatch,
-    trackSession, removeSession, updateSessionMatch
+    trackSession, removeSession, updateSessionMatch,
+    saveMatchHistory
   };
 })();
