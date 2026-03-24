@@ -73,6 +73,13 @@ input, button {
   flex-direction: column;
 }
 
+#screen-local-match, #screen-tournament-match {
+  padding: 0;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translate3d(0, 20px, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -2226,9 +2233,9 @@ input, button {
   flex-direction: column;
 }
 
-/* ~32% Top Section: Pitch (No Scroll) */
+/* 20% Top Section: Pitch (No Scroll) */
 .pitch-container {
-  flex: 0 0 32%;
+  flex: 0 0 20%;
   position: relative;
   background: linear-gradient(to bottom, #102e17, #1c4b26 40%, #225e30);
   border-bottom: 2px solid var(--border-color);
@@ -2243,7 +2250,7 @@ input, button {
 .pitch-surface {
   position: relative;
   width: 90%;
-  height: clamp(80px, 12vh, 120px);
+  height: clamp(60px, 10vh, 90px);
   background: #dbcca1; /* Pitch dirt color */
   border-radius: 4px;
   border-top: 2px solid rgba(255,255,255,0.4);
@@ -2524,12 +2531,12 @@ input, button {
 }
 
 .match-container.with-pitch .score-runs {
-  font-size: min(2.5rem, 8vh);
+  font-size: min(2.5rem, 6vh);
 }
 
 .match-container.with-pitch .score-wickets, 
 .match-container.with-pitch .score-separator {
-  font-size: min(1.8rem, 6vh);
+  font-size: min(1.8rem, 4.5vh);
 }
 
 .match-container.with-pitch .controls {
