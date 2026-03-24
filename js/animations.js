@@ -101,26 +101,30 @@ const Animations = (() => {
       runnerB.classList.add('is-running');
 
       // Initialize dataset positions if empty
-      if (!runnerA.dataset.pos) runnerA.dataset.pos = 'top';
-      if (!runnerB.dataset.pos) runnerB.dataset.pos = 'bottom';
+      if (!runnerA.dataset.pos) runnerA.dataset.pos = 'left';
+      if (!runnerB.dataset.pos) runnerB.dataset.pos = 'right';
 
       const swapOnce = () => {
         // Swap A
-        if (runnerA.dataset.pos === 'top') {
-          runnerA.dataset.pos = 'bottom';
-          runnerA.style.top = '78%';
+        if (runnerA.dataset.pos === 'left') {
+          runnerA.dataset.pos = 'right';
+          runnerA.style.left = '85%';
+          runnerA.dataset.dir = 'right';
         } else {
-          runnerA.dataset.pos = 'top';
-          runnerA.style.top = '5%';
+          runnerA.dataset.pos = 'left';
+          runnerA.style.left = '5%';
+          runnerA.dataset.dir = 'left';
         }
         
         // Swap B
-        if (runnerB.dataset.pos === 'bottom') {
-          runnerB.dataset.pos = 'top';
-          runnerB.style.top = '5%';
+        if (runnerB.dataset.pos === 'right') {
+          runnerB.dataset.pos = 'left';
+          runnerB.style.left = '5%';
+          runnerB.dataset.dir = 'left';
         } else {
-          runnerB.dataset.pos = 'bottom';
-          runnerB.style.top = '78%';
+          runnerB.dataset.pos = 'right';
+          runnerB.style.left = '85%';
+          runnerB.dataset.dir = 'right';
         }
       };
 
@@ -138,6 +142,10 @@ const Animations = (() => {
       setTimeout(() => {
         runnerA.classList.remove('is-running');
         runnerB.classList.remove('is-running');
+        
+        // Face the pitch center after stopping
+        runnerA.dataset.dir = runnerA.dataset.pos === 'left' ? 'right' : 'left';
+        runnerB.dataset.dir = runnerB.dataset.pos === 'left' ? 'right' : 'left';
       }, runs * 1100);
     }
   }

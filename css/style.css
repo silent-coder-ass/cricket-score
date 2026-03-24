@@ -376,7 +376,7 @@ input, button {
 .player-names-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: min(12px, 1.5vh);
 }
 
 .player-names-group {
@@ -546,7 +546,7 @@ input, button {
 .config-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: min(12px, 1.5vh);
 }
 
 /* Premium Select */
@@ -835,7 +835,7 @@ input, button {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: min(12px, 1.5vh);
   padding-bottom: 16px;
 }
 
@@ -1850,7 +1850,7 @@ input, button {
   }
   
   .setup-form {
-    gap: 12px;
+    gap: min(12px, 1.5vh);
   }
   
   .form-group input,
@@ -2080,7 +2080,7 @@ input, button {
    ================================================ */
 
 .match-container.with-pitch {
-  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
   padding: 0;
   max-width: 600px;
@@ -2091,7 +2091,7 @@ input, button {
 
 /* 60% Top Section: Pitch */
 .pitch-container {
-  flex: 0 0 55%;
+  flex: 0 0 45%;
   position: relative;
   background: linear-gradient(to bottom, #102e17, #1c4b26 40%, #225e30);
   border-bottom: 2px solid var(--border-color);
@@ -2105,13 +2105,13 @@ input, button {
 /* Pitch Surface & Depth */
 .pitch-surface {
   position: relative;
-  width: 140px;
-  height: 85%;
+  width: 90%;
+  height: 130px;
   background: #dbcca1; /* Pitch dirt color */
   border-radius: 4px;
-  border-left: 2px solid rgba(255,255,255,0.4);
-  border-right: 2px solid rgba(255,255,255,0.4);
-  transform: rotateX(25deg);
+  border-top: 2px solid rgba(255,255,255,0.4);
+  border-bottom: 2px solid rgba(255,255,255,0.4);
+  transform: rotateX(15deg);
   transform-style: preserve-3d;
   box-shadow: inset 0 0 30px rgba(0,0,0,0.1), 0 10px 30px rgba(0,0,0,0.4);
 }
@@ -2124,58 +2124,206 @@ input, button {
 
 .crease {
   position: absolute;
-  width: 100%;
-  height: 2px;
+  width: 2px;
+  height: 100%;
+  top: 0;
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 0 4px rgba(255,255,255,0.5);
 }
 
-.top-crease { top: 15%; }
-.bottom-crease { bottom: 15%; }
+.left-crease { left: 15%; }
+.right-crease { right: 15%; }
 
-/* Pitch Runners (Silhouettes) */
-.runner {
+/* Stumps */
+.stumps {
   position: absolute;
-  width: 24px;
-  height: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: bottom center;
-  transition: top 1s ease-in-out;
-  z-index: 5;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  width: 12px;
+  height: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  background-image: 
+    linear-gradient(to right, 
+      #ffb042 0px, #ffb042 2px, 
+      transparent 2px, transparent 5px, 
+      #ffb042 5px, #ffb042 7px, 
+      transparent 7px, transparent 10px, 
+      #ffb042 10px, #ffb042 12px);
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
 }
-
-/* A simple SVG silhouette used as mask for coloring */
-.runner::before {
+.stumps::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background-color: inherit;
-  /* Basic standing silhouette */
-  clip-path: polygon(40% 0, 60% 0, 65% 15%, 50% 20%, 60% 40%, 75% 50%, 65% 60%, 55% 45%, 55% 100%, 45% 100%, 45% 45%, 35% 60%, 25% 50%, 40% 40%, 50% 20%, 35% 15%);
+  top: -3px;
+  left: -1px;
+  width: 14px;
+  height: 3px;
+  background: #ffb042;
+  border-radius: 2px;
+}
+.left-stumps { left: 15%; margin-left: -6px; }
+.right-stumps { right: 15%; margin-right: -6px; }
+
+/* Pitch Runners (Player Graphics) */
+.runner {
+  position: absolute;
+  width: 32px;
+  height: 55px;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background-color: transparent;
+  transition: left 1s ease-in-out, scale 0.2s ease;
+  z-index: 5;
+  filter: drop-shadow(0 5px 6px rgba(0,0,0,0.5));
+  scale: 1 1;
 }
 
-.runner-a {
-  background-color: var(--accent); /* Blue */
-  top: 5%; /* Bowler end default */
+.runner[data-dir="left"] {
+  scale: -1 1;
 }
 
-.runner-b {
-  background-color: var(--red); /* Red */
-  top: 78%; /* Batter end default */
+/* Realistic CSS Player Graphic */
+.player-graphic {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
-/* Running state animation class */
+/* Base parts */
+.p-head {
+  position: absolute;
+  width: 14px;
+  height: 16px;
+  border-radius: 50%;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+.p-cap {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 18px;
+  height: 10px;
+  background: inherit;
+  border-radius: 8px 8px 0 0;
+}
+.p-cap::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: -6px;
+  width: 10px;
+  height: 4px;
+  background: inherit;
+  border-radius: 2px;
+}
+
+.p-torso {
+  position: absolute;
+  width: 14px;
+  height: 22px;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 4px;
+  z-index: 8;
+}
+
+.p-arm {
+  position: absolute;
+  width: 6px;
+  height: 18px;
+  border-radius: 3px;
+  top: 20px;
+  transform-origin: top center;
+}
+.p-arm-back { left: 8px; z-index: 7; filter: brightness(0.8); }
+.p-arm-front { left: 16px; z-index: 9; }
+
+.p-leg {
+  position: absolute;
+  width: 6px;
+  height: 22px;
+  background: #fff; /* white pads */
+  border-radius: 3px;
+  top: 40px;
+  transform-origin: top center;
+}
+.p-leg.p-leg-back { left: 10px; z-index: 6; filter: brightness(0.8); }
+.p-leg.p-leg-front { left: 16px; z-index: 10; border-left: 2px solid #ccc; }
+
+.p-bat {
+  position: absolute;
+  width: 5px;
+  height: 35px;
+  background: #d4af37;
+  border-radius: 2px;
+  top: 15px;
+  left: 10px;
+  z-index: 8;
+  transform-origin: top center;
+  transform: rotate(-25deg);
+}
+
+/* Colors for specific teams */
+.runner-a .p-head, .runner-a .p-cap, .runner-a .p-torso, .runner-a .p-arm {
+  background: var(--accent);
+}
+.runner-b .p-head, .runner-b .p-cap, .runner-b .p-torso, .runner-b .p-arm {
+  background: var(--red);
+}
+
+/* Layout lanes */
+.runner-a { top: 30%; left: 5%; }
+.runner-b { top: 70%; left: 85%; }
+
+/* Realistic Running Animation Keyframes */
 .runner.is-running {
-  animation: runBounce 0.3s infinite alternate;
+  animation: runTranslate 0.4s infinite linear;
 }
 
-@keyframes runBounce {
-  0% { transform: translateX(-50%) translateY(0); clip-path: polygon(45% 0, 65% 5%, 60% 20%, 55% 25%, 70% 45%, 85% 50%, 75% 65%, 55% 50%, 65% 100%, 50% 100%, 45% 55%, 30% 65%, 15% 50%, 35% 40%, 45% 25%, 30% 15%); }
-  100% { transform: translateX(-50%) translateY(-6px); clip-path: polygon(35% 0, 55% 0, 60% 15%, 45% 20%, 65% 40%, 75% 55%, 60% 65%, 50% 45%, 45% 100%, 35% 100%, 40% 45%, 20% 60%, 15% 45%, 35% 35%, 45% 20%, 30% 10%); }
+.runner.is-running .p-torso { animation: runTorso 0.4s infinite alternate ease-in-out; }
+.runner.is-running .p-head { animation: runHead 0.4s infinite alternate ease-in-out; }
+.runner.is-running .p-arm-front { animation: runArmFront 0.4s infinite alternate ease-in-out; }
+.runner.is-running .p-arm-back { animation: runArmBack 0.4s infinite alternate ease-in-out; }
+.runner.is-running .p-leg-front { animation: runLegFront 0.4s infinite alternate ease-in-out; }
+.runner.is-running .p-leg-back { animation: runLegBack 0.4s infinite alternate ease-in-out; }
+.runner.is-running .p-bat { animation: runBat 0.4s infinite alternate ease-in-out; }
+
+@keyframes runTranslate {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: -4px; }
+}
+@keyframes runTorso {
+  0% { transform: translateX(-50%) rotate(10deg); }
+  100% { transform: translateX(-50%) rotate(18deg); }
+}
+@keyframes runHead {
+  0% { transform: translateX(-50%) rotate(0deg); top: 4px; }
+  100% { transform: translateX(-50%) rotate(5deg); top: 5px; }
+}
+@keyframes runArmFront {
+  0% { transform: rotate(50deg); }
+  100% { transform: rotate(-50deg); }
+}
+@keyframes runArmBack {
+  0% { transform: rotate(-50deg); }
+  100% { transform: rotate(50deg); }
+}
+@keyframes runLegFront {
+  0% { transform: rotate(-40deg); }
+  100% { transform: rotate(30deg); }
+}
+@keyframes runLegBack {
+  0% { transform: rotate(30deg); }
+  100% { transform: rotate(-40deg); }
+}
+@keyframes runBat {
+  0% { transform: rotate(-35deg) scale(1) translateY(5px); }
+  100% { transform: rotate(15deg) scale(0.9) translateY(0px); }
 }
 
 /* Four & Six Event Overlay on Pitch */
@@ -2222,7 +2370,7 @@ input, button {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: min(12px, 1.5vh);
   background: var(--bg-primary);
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
@@ -2235,16 +2383,16 @@ input, button {
 /* Adjustments for the inner scoreboard to fit 40% space */
 .match-container.with-pitch .scoreboard {
   margin-bottom: 0;
-  padding: 12px;
+  padding: min(12px, 1.5vh);
 }
 
 .match-container.with-pitch .score-runs {
-  font-size: 2.5rem;
+  font-size: min(2.5rem, 8vh);
 }
 
 .match-container.with-pitch .score-wickets, 
 .match-container.with-pitch .score-separator {
-  font-size: 1.8rem;
+  font-size: min(1.8rem, 6vh);
 }
 
 .match-container.with-pitch .controls {
@@ -2252,13 +2400,13 @@ input, button {
 }
 
 .match-container.with-pitch .run-btn {
-  padding: 10px 0;
-  font-size: 1.05rem;
+  padding: min(10px, 1.5vh) 0;
+  font-size: min(1.05rem, 3vh);
 }
 
 .match-container.with-pitch .extra-btn {
-  padding: 8px 0;
-  font-size: 0.85rem;
+  padding: min(8px, 1.2vh) 0;
+  font-size: min(0.85rem, 2.5vh);
 }
 
 .match-container.with-pitch .extra-run-btn {
