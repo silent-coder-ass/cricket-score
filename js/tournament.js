@@ -156,7 +156,12 @@ const TournamentMode = (() => {
         }
         // Trigger animation for remote events
         if (data.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== data.lastEvent.timestamp)) {
-          Animations.show(data.lastEvent.type);
+          const type = data.lastEvent.type;
+          Animations.show(type);
+          if (type && type.startsWith('run')) {
+             const runs = parseInt(type.replace('run',''));
+             Animations.playPitchAnimation(runs, 'tournament');
+          }
         }
         // Preserve local history (since it's not synced from Firebase)
         const localHistory = matchState && matchState.history ? matchState.history : [];
@@ -212,7 +217,12 @@ const TournamentMode = (() => {
         }
         // Trigger animation for remote events
         if (updatedData.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== updatedData.lastEvent.timestamp)) {
-          Animations.show(updatedData.lastEvent.type);
+          const type = updatedData.lastEvent.type;
+          Animations.show(type);
+          if (type && type.startsWith('run')) {
+             const runs = parseInt(type.replace('run',''));
+             Animations.playPitchAnimation(runs, 'tournament');
+          }
         }
         // Preserve local history
         const localHistory = matchState && matchState.history ? matchState.history : [];
@@ -238,9 +248,9 @@ const TournamentMode = (() => {
 
     switch (action) {
       case 'dot':  CricketEngine.addRuns(matchState, 0); break;
-      case '1':    CricketEngine.addRuns(matchState, 1); Animations.playPitchAnimation(1, 'tournament'); break;
-      case '2':    CricketEngine.addRuns(matchState, 2); Animations.playPitchAnimation(2, 'tournament'); break;
-      case '3':    CricketEngine.addRuns(matchState, 3); Animations.playPitchAnimation(3, 'tournament'); break;
+      case '1':    CricketEngine.addRuns(matchState, 1); Animations.playPitchAnimation(1, 'tournament'); animType = 'run1'; break;
+      case '2':    CricketEngine.addRuns(matchState, 2); Animations.playPitchAnimation(2, 'tournament'); animType = 'run2'; break;
+      case '3':    CricketEngine.addRuns(matchState, 3); Animations.playPitchAnimation(3, 'tournament'); animType = 'run3'; break;
       case '4':    CricketEngine.addRuns(matchState, 4); Animations.playPitchAnimation(4, 'tournament'); animType = 'four'; break;
       case '5':    CricketEngine.addRuns(matchState, 5); break;
       case '6':    CricketEngine.addRuns(matchState, 6); Animations.playPitchAnimation(6, 'tournament'); animType = 'six'; break;

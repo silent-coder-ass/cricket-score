@@ -111,7 +111,12 @@ const LocalMode = (() => {
         }
         // Trigger animation for remote events
         if (data.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== data.lastEvent.timestamp)) {
-          Animations.show(data.lastEvent.type);
+          const type = data.lastEvent.type;
+          Animations.show(type);
+          if (type && type.startsWith('run')) {
+             const runs = parseInt(type.replace('run',''));
+             Animations.playPitchAnimation(runs, 'local');
+          }
         }
         // Preserve local history (since it's not synced from Firebase)
         const localHistory = matchState && matchState.history ? matchState.history : [];
@@ -165,7 +170,12 @@ const LocalMode = (() => {
         }
         // Trigger animation for remote events
         if (updatedData.lastEvent && (!matchState || !matchState.lastEvent || matchState.lastEvent.timestamp !== updatedData.lastEvent.timestamp)) {
-          Animations.show(updatedData.lastEvent.type);
+          const type = updatedData.lastEvent.type;
+          Animations.show(type);
+          if (type && type.startsWith('run')) {
+             const runs = parseInt(type.replace('run',''));
+             Animations.playPitchAnimation(runs, 'local');
+          }
         }
         // Preserve local history
         const localHistory = matchState && matchState.history ? matchState.history : [];
@@ -230,14 +240,17 @@ const LocalMode = (() => {
       case '1':
         CricketEngine.addRuns(matchState, 1);
         Animations.playPitchAnimation(1, 'local');
+        animType = 'run1';
         break;
       case '2':
         CricketEngine.addRuns(matchState, 2);
         Animations.playPitchAnimation(2, 'local');
+        animType = 'run2';
         break;
       case '3':
         CricketEngine.addRuns(matchState, 3);
         Animations.playPitchAnimation(3, 'local');
+        animType = 'run3';
         break;
       case '4':
         CricketEngine.addRuns(matchState, 4);
