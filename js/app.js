@@ -116,12 +116,198 @@ const App = (() => {
     }
   }
 
+  // ==========================================
+  // SERVICE WORKER REGISTRATION (FCM)
+  // ==========================================
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      .then(r  => console.log('[SW] Registered:', r.scope))
+      .catch(e => console.warn('[SW] Registration failed:', e));
+  }
+
+  // =================================================
+  // PINNED MATCH MANAGER — Notification-Only
+  // Works on: Android Chrome, Desktop Chrome, Firefox
+  // =================================================
+  const VAPID_KEY = 'BDRdmPMEpxIwqsGFujWKC_vgl2qkU_LojLDhHTIrLAKw3QOzFyfSbXGWDNDaVF14AcrQG5dfv9f8IPFHgHgYHA8';
+
+  function showToast(msg, duration) {
+    duration = duration || 2500;
+    var t = document.getElementById('pin-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'pin-toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);' +
+        'background:rgba(10,14,26,0.96);color:#fff;padding:10px 22px;border-radius:30px;' +
+        'font-size:0.85rem;font-weight:600;letter-spacing:0.3px;' +
+        'box-shadow:0 4px 24px rgba(0,0,0,0.6);z-index:99999;' +
+        'transition:opacity 0.25s,transform 0.25s;opacity:0;' +
+        'border:1px solid rgba(0,229,255,0.25);white-space:nowrap;pointer-events:none;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    requestAnimationFrame(function() {
+      t.style.opacity = '1';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    clearTimeout(t._hide);
+    t._hide = setTimeout(function() {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+    }, duration);
+  }
+
+  var PinnedManager = {
+    currentRef: null,
+    messaging:  null,
+
+    init: function() {
+      // Init Firebase Messaging
+      try {
+        if (typeof firebase !== 'undefined' && firebase.messaging) {
+          this.messaging = firebase.messaging();
+        }
+      } catch(e) {}
+
+      // Restore pin from previous session if match still live
+      var savedId = sessionStorage.getItem('pinnedMatchId');
+      if (!savedId) return;
+      var DB = FirebaseSync.getDb();
+      if (!DB) { sessionStorage.removeItem('pinnedMatchId'); return; }
+      var self = this;
+      DB.ref('matches/current/' + savedId).once('value').then(function(snap) {
+        var val = snap.val();
+        if (val && !val.isMatchOver) {
+          self._listen(savedId);
+        } else {
+          sessionStorage.removeItem('pinnedMatchId');
+        }
+      }).catch(function() { sessionStorage.removeItem('pinnedMatchId'); });
+    },
+
+    pinMatch: async function(matchId) {
+      // Check API support
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        showToast('❌ Notifications not supported in this browser');
+        return;
+      }
+      // Request permission
+      if (Notification.permission !== 'granted') {
+        var perm = 'denied';
+        try { perm = await Notification.requestPermission(); } catch(e) {}
+        if (perm !== 'granted') {
+          showToast('❌ Allow notifications to pin live score');
+          return;
+        }
+      }
+      // FCM token (non-blocking)
+      if (this.messaging) {
+        var msg = this.messaging;
+        navigator.serviceWorker.ready.then(function(sw) {
+          return msg.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: sw });
+        }).then(function(t) {
+          console.log('[FCM] token:', t ? t.slice(0,20)+'…' : 'none');
+        }).catch(function(e) {
+          console.warn('[FCM] getToken:', e);
+        });
+      }
+      // Save and start
+      sessionStorage.setItem('pinnedMatchId', matchId);
+      this._listen(matchId);
+      showToast('📌 Live score pinned');
+    },
+
+    unpin: async function(showFeedback) {
+      if (showFeedback === undefined) showFeedback = true;
+      sessionStorage.removeItem('pinnedMatchId');
+      this._detach();
+      try {
+        var reg = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+        if (reg) {
+          var notifs = await reg.getNotifications({ tag: 'live-score' });
+          notifs.forEach(function(n) { n.close(); });
+        }
+      } catch(e) {}
+      if (showFeedback) showToast('🗑 Live score unpinned');
+    },
+
+    _listen: function(matchId) {
+      this._detach();
+      var DB = FirebaseSync.getDb();
+      if (!DB) return;
+      var self = this;
+      this.currentRef = DB.ref('matches/current/' + matchId);
+      this.currentRef.on('value', function(snap) {
+        var val = snap.val();
+        if (!val || val.isMatchOver) {
+          if (val && val.isMatchOver) {
+            var bat = val.teams && val.teams[val.currentInnings === 0 ? 0 : 1];
+            self._push(
+              '🏏 MATCH FINISHED',
+              'Winner: ' + (val.winner || '?') + '\nFinal: ' + (bat ? bat.runs+'/'+bat.wickets : ''),
+              true
+            );
+            setTimeout(function() { self.unpin(false); }, 10000);
+          } else {
+            self.unpin(false);
+          }
+          return;
+        }
+        var teamA = (val.teams && val.teams[0] && val.teams[0].name) || 'Team A';
+        var teamB = (val.teams && val.teams[1] && val.teams[1].name) || 'Team B';
+        var bat   = val.teams && val.teams[val.currentInnings || 0];
+        if (!bat) return;
+        var runs  = bat.runs    != null ? bat.runs    : 0;
+        var wkts  = bat.wickets != null ? bat.wickets : 0;
+        var ovs   = bat.overs   != null ? bat.overs   : '0.0';
+        var left  = self._remaining(val.totalOvers, ovs);
+        var tgt   = val.target ? 'Target: ' + val.target : '';
+        var lines = [bat.name + ': ' + runs + '/' + wkts, 'Overs: ' + ovs, left, tgt]
+          .filter(Boolean).join('\n');
+        self._push('🔴 LIVE: ' + teamA + ' vs ' + teamB, lines, false);
+      });
+    },
+
+    _push: function(title, body, isFinished) {
+      if (!('serviceWorker' in navigator)) return;
+      navigator.serviceWorker.ready.then(function(reg) {
+        return reg.showNotification(title, {
+          body:               body,
+          icon:               '/public/stadium-bg.png',
+          badge:              '/public/stadium-bg.png',
+          tag:                'live-score',
+          renotify:           false,
+          requireInteraction: !isFinished,
+          silent:             true,
+          data:               { url: '/' }
+        });
+      }).catch(function(e) { console.warn('[SW] showNotification:', e); });
+    },
+
+    _detach: function() {
+      if (this.currentRef) { this.currentRef.off('value'); this.currentRef = null; }
+    },
+
+    _remaining: function(total, overs) {
+      if (!total) return '';
+      var p    = parseFloat(overs);
+      var done = Math.floor(p) * 6 + Math.round((p % 1) * 10);
+      var left = total * 6 - done;
+      if (left <= 0) return '';
+      var ol = Math.floor(left / 6), bl = left % 6;
+      return ol > 0 ? ol + '.' + bl + ' left' : left + 'b left';
+    }
+  };
+
   /**
    * Initialize the app
    */
   function init() {
     // Init Firebase
     FirebaseSync.init();
+    
+    // Init Pinned Widget
+    PinnedManager.init();
 
     // ===== User Session Tracking =====
     const sessionId = crypto.randomUUID ? crypto.randomUUID() : 
@@ -177,46 +363,6 @@ const App = (() => {
           .catch(() => { /* Keep as Unknown */ });
       });
 
-    // Step 2: Show banner for precise GPS upgrade (optional, improves accuracy)
-    if (navigator.geolocation) {
-      const banner = document.createElement('div');
-      banner.id = 'location-banner';
-      banner.innerHTML = `
-        <div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#111827;border-top:1px solid #1e293b;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'Outfit',sans-serif;">
-          <span style="color:#f1f5f9;font-size:0.9rem;">📍 Enable precise location for match analytics?</span>
-          <div style="display:flex;gap:8px;flex-shrink:0;">
-            <button id="loc-allow" style="padding:8px 16px;border:none;border-radius:8px;background:#00e5ff;color:#000;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;font-size:0.85rem;">Allow</button>
-            <button id="loc-deny" style="padding:8px 16px;border:1px solid #374151;border-radius:8px;background:transparent;color:#94a3b8;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;font-size:0.85rem;">No Thanks</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(banner);
-
-      document.getElementById('loc-allow').addEventListener('click', () => {
-        banner.remove();
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            sessionData.lat = pos.coords.latitude;
-            sessionData.lng = pos.coords.longitude;
-            // Reverse geocode for city name
-            fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + pos.coords.latitude + '&longitude=' + pos.coords.longitude + '&localityLanguage=en')
-              .then(r => r.json())
-              .then(geo => {
-                sessionData.city = geo.city || geo.locality || geo.principalSubdivision || sessionData.city;
-                sessionData.country = geo.countryName || sessionData.country;
-                FirebaseSync.trackSession(sessionData);
-              })
-              .catch(() => FirebaseSync.trackSession(sessionData));
-          },
-          () => { /* GPS failed, IP location already captured */ },
-          { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
-        );
-      });
-
-      document.getElementById('loc-deny').addEventListener('click', () => banner.remove());
-      setTimeout(() => { if (banner.parentNode) banner.remove(); }, 15000);
-    }
-
     // Clean up session on page unload
     window.addEventListener('beforeunload', () => {
       FirebaseSync.removeSession(sessionId);
@@ -259,11 +405,21 @@ const App = (() => {
            teamBtxt = match.teams[1].name || 'Team B';
         }
 
+        const isPinned = sessionStorage.getItem('pinnedMatchId') === match.id;
+        const pinAction = isPinned ? 'unpin-match' : 'pin-match';
+        const pinText   = isPinned ? '🛑 Unpin Match' : '📌 Pin This Match';
+        const descText  = isPinned ? '📌 Pinned ✓'   : 'Tap to View Score';
+
         html += `
           <div class="live-match-banner" data-match-id="${match.id}" style="display: block; margin-bottom: 12px; cursor: pointer;">
             <div class="live-badge"><span></span>LIVE ${modeLabel}</div>
+            <button class="banner-menu-btn" data-action="toggle-menu">⋮</button>
+            <div class="banner-menu-dropdown hidden">
+               <button class="dropdown-item" data-action="view-match">👁 View Live Match</button>
+               <button class="dropdown-item" data-action="${pinAction}">${pinText}</button>
+            </div>
             <div class="live-match-teams">${teamAtxt} vs ${teamBtxt}</div>
-            <div class="live-match-desc">Tap to View Score</div>
+            <div class="live-match-desc">${descText}</div>
           </div>
         `;
       });
@@ -277,9 +433,43 @@ const App = (() => {
         
         const matchId = card.getAttribute('data-match-id');
         const matchState = globalMatchesMap[matchId];
-        
         if (!matchState) return;
-        
+
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
+          e.stopPropagation();
+          const action = actionBtn.getAttribute('data-action');
+          if (action === 'toggle-menu') {
+            document.querySelectorAll('.banner-menu-dropdown').forEach(d => {
+               if (d !== card.querySelector('.banner-menu-dropdown')) d.classList.add('hidden');
+            });
+            card.querySelector('.banner-menu-dropdown').classList.toggle('hidden');
+            return; // stop here
+          }
+
+          if (action === 'pin-match') {
+            e.preventDefault();
+            document.querySelectorAll('.banner-menu-dropdown').forEach(d => d.classList.add('hidden'));
+            PinnedManager.pinMatch(matchState.id);
+            return; // CRITICAL: do not fall through to cinematic/navigation
+          }
+
+          if (action === 'unpin-match') {
+            e.preventDefault();
+            document.querySelectorAll('.banner-menu-dropdown').forEach(d => d.classList.add('hidden'));
+            PinnedManager.unpin(true);
+            return; // CRITICAL: do not fall through to cinematic/navigation
+          }
+
+          if (action === 'view-match') {
+            card.querySelector('.banner-menu-dropdown').classList.add('hidden');
+            // fall through to joinMatch below
+          } else {
+            return; // unknown action — do nothing
+          }
+        }
+
+        // Only reach here when tapping the card directly OR 'view-match'
         const joinMatch = () => {
           if (matchState.mode === 'local') {
             FirebaseSync.updateSessionMatch(sessionId, matchState.teams[0].name + ' vs ' + matchState.teams[1].name);
@@ -306,14 +496,45 @@ const App = (() => {
         e.stopPropagation();
         homeDropdown.classList.toggle('hidden');
       });
-      document.addEventListener('click', () => {
-        if (!homeDropdown.classList.contains('hidden')) {
+      document.addEventListener('click', (e) => {
+        if (!homeDropdown.classList.contains('hidden') && !e.target.closest('#btn-home-menu')) {
           homeDropdown.classList.add('hidden');
+        }
+        
+        if (!e.target.closest('.banner-menu-btn')) {
+          document.querySelectorAll('.banner-menu-dropdown').forEach(d => d.classList.add('hidden'));
         }
       });
       document.getElementById('btn-go-history').addEventListener('click', () => {
         navigate('history');
       });
+
+      // ---- Theme Toggle Logic ----
+      const btnToggleTheme = document.getElementById('btn-toggle-theme');
+      if (btnToggleTheme) {
+        // Init theme state from local storage
+        const savedTheme = localStorage.getItem('app_theme') || 'premium';
+        if (savedTheme === 'basic') {
+          document.body.classList.add('theme-basic');
+          btnToggleTheme.textContent = '⚫ Switch to Premium Theme';
+        } else {
+          document.body.classList.remove('theme-basic');
+          btnToggleTheme.textContent = '⚪ Switch to Basic White Theme';
+        }
+
+        // Handle click event to switch themes
+        btnToggleTheme.addEventListener('click', () => {
+          const isBasic = document.body.classList.toggle('theme-basic');
+          if (isBasic) {
+            localStorage.setItem('app_theme', 'basic');
+            btnToggleTheme.textContent = '⚫ Switch to Premium Theme';
+          } else {
+            localStorage.setItem('app_theme', 'premium');
+            btnToggleTheme.textContent = '⚪ Switch to Basic White Theme';
+          }
+        });
+      }
+
     }
 
     // ---- Navigation buttons ----

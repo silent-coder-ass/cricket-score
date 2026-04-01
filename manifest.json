@@ -1,0 +1,25 @@
+{
+  "name": "Quick Cricket Score",
+  "short_name": "Cricket Score",
+  "description": "Premium mobile-first live cricket scoring app with real-time notifications.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e1a",
+  "theme_color": "#00e5ff",
+  "icons": [
+    {
+      "src": "/public/stadium-bg.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/public/stadium-bg.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

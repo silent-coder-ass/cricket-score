@@ -205,7 +205,7 @@ const FirebaseSync = (() => {
   }
 
   return { 
-    init, syncState, 
+    init, syncState, getDb: () => db,
     listenMatch, removeMatchCallback, stopListeningMatch, 
     listenAllMatches, stopListeningAll,
     resetMatch,

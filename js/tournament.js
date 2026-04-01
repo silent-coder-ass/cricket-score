@@ -409,7 +409,10 @@ const TournamentMode = (() => {
   function showMatchEnd() {
     if (!matchState) return;
     document.getElementById('winner-title').textContent = matchState.winMessage || 'Match Over';
-    document.getElementById('winner-team-name').textContent = matchState.winner || '';
+
+    const teamNameEl = document.getElementById('winner-team-name');
+    teamNameEl.textContent  = '';
+    teamNameEl.dataset.team = matchState.winner || '';
 
     const scoresHTML = matchState.teams.map(t => {
       const o = Math.floor(t.balls / 6);
@@ -417,6 +420,9 @@ const TournamentMode = (() => {
       return `<div class="final-score-line"><span>${t.name}</span> — ${t.runs}/${t.wickets} (${o}.${b} overs)</div>`;
     }).join('');
     document.getElementById('final-scores').innerHTML = scoresHTML;
+
+    const congrats = document.getElementById('congrats-msg');
+    if (congrats) { congrats.style.opacity = '0'; congrats.style.transform = 'scale(0.7)'; congrats.style.transition = ''; }
 
     App.navigate('match-end');
     Animations.celebrate();

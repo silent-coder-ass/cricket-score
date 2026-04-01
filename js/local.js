@@ -475,7 +475,11 @@ const LocalMode = (() => {
   function showMatchEnd() {
     if (!matchState) return;
     el('winner-title').textContent = matchState.winMessage || 'Match Over';
-    el('winner-team-name').textContent = matchState.winner || '';
+
+    // Set data-team so letter-drop animation can read it
+    const teamNameEl = el('winner-team-name');
+    teamNameEl.textContent = '';
+    teamNameEl.dataset.team = matchState.winner || '';
 
     const scoresHTML = matchState.teams.map(t => {
       const overs = Math.floor(t.balls / 6);
@@ -483,6 +487,10 @@ const LocalMode = (() => {
       return `<div class="final-score-line"><span>${t.name}</span> — ${t.runs}/${t.wickets} (${overs}.${balls} overs)</div>`;
     }).join('');
     el('final-scores').innerHTML = scoresHTML;
+
+    // Reset congrats opacity for re-entry
+    const congrats = document.getElementById('congrats-msg');
+    if (congrats) { congrats.style.opacity = '0'; congrats.style.transform = 'scale(0.7)'; congrats.style.transition = ''; }
 
     App.navigate('match-end');
     Animations.celebrate();
