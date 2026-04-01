@@ -1,0 +1,19 @@
+{
+  "esversion": 11,
+  "browser": true,
+  "devel": true,
+  "undef": true,
+  "unused": false,
+  "globals": {
+    "firebase": false,
+    "crypto": false,
+    "L": false,
+    "LocalMode": true,
+    "TournamentMode": true,
+    "Animations": true,
+    "AdminPanel": true,
+    "FirebaseSync": true,
+    "CricketEngine": true,
+    "App": true
+  }
+}

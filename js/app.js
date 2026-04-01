@@ -476,9 +476,9 @@ const App = (() => {
     document.getElementById('intro-team-a-name').textContent = teamA;
     document.getElementById('intro-team-b-name').textContent = teamB;
     
-    // Attempt to get overs/players from settings (each mode may store them slightly differently)
-    const overs = matchState.settings?.totalOvers || matchState.settings?.overs || '10';
-    const players = matchState.playersPerTeam || matchState.settings?.players || '11';
+    // Fetch overs and players accurately from the state
+    const overs = matchState.totalOvers || '10';
+    const players = matchState.playersPerTeam || '11';
     
     document.getElementById('intro-overs').textContent = `${overs} Overs Match`;
     document.getElementById('intro-players').textContent = `${players} Players`;

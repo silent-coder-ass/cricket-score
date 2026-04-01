@@ -16,7 +16,7 @@ const AdminPanel = (() => {
 
   // Admin credentials (SHA-256 hashed)
   // ID: "sanuwar" → hash, Password: "sanuwar456" → hash
-  const ADMIN_ID_HASH = '5d209846831a1d55ae1836dc21d2d1507cdb0579e5b0e931d5a0e622b tried';
+  const ADMIN_ID_HASH = '';
   const ADMIN_PASS_HASH = '';
 
   let db = null;

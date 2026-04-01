@@ -1,5 +1,5 @@
-const firebase = require('firebase/app');
-require('firebase/database');
+const firebase = require('firebase/compat/app');
+require('firebase/compat/database');
 
 const firebaseConfig = {
     apiKey: "AIzaSyDcrIULzcnp4hqj7jL7v9VWtaC0jhIGyNo",
